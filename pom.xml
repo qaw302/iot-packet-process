@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.nhnacademy</groupId>
-  <artifactId>iot_gateway</artifactId>
+  <artifactId>iot-packet-process</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <properties>
