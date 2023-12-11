@@ -14,21 +14,23 @@ import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.wire.Wire;
 
-public class Debug extends OutputNode {
+public class DebugNode extends OutputNode {
 
     String path = "src/test/java/logs.json";
     String nodeName = "";
-    // Fix constructor name
-    public Debug(String name, int inCount) {
-        super(name, inCount);
-        // TODO Auto-generated constructor stub
+
+    public DebugNode() {
+        super();
+    }
+
+    public DebugNode(String name) {
+        super(name);
     }
 
     @Override
     void process() {
         sendToLogs();
     }
-
 
     public void sendToLogs() {
         try {
@@ -39,7 +41,7 @@ public class Debug extends OutputNode {
 
                     if (message instanceof JsonMessage) {
                         JsonMessage jsonMessage = (JsonMessage) message;
-                        //parse한 객체 생성
+                        // parse한 객체 생성
 
                         JSONObject jsonlog = createJsonLog(jsonMessage);
 
@@ -53,22 +55,17 @@ public class Debug extends OutputNode {
                             }
                         }
 
-                        
-
-
                         // 기존 데이터 읽어오기
                         List<String> existingData = readExistingData(file);
 
                         // 새로운 데이터 추가
 
-                        //existingData.add(jsonMessage.getJsonObject().toJSONString());
+                        // existingData.add(jsonMessage.getJsonObject().toJSONString());
                         existingData.add(jsonlog.toJSONString());
-                       
 
                         // JSON 파일 쓰기
                         writeDataToFile(file, existingData);
 
-                        
                     }
                 }
             }
@@ -135,12 +132,12 @@ public class Debug extends OutputNode {
         return 0; // 기본 값 또는 오류 처리에 맞게 반환
     }
 
-    public void setNodeName(String name){
+    public void setNodeName(String name) {
         this.nodeName = name;
 
     }
 
-    public String getNodeName(){
+    public String getNodeName() {
         return nodeName;
     }
 
@@ -153,5 +150,5 @@ public class Debug extends OutputNode {
     void postprocess() {
         throw new UnsupportedOperationException("Unimplemented method 'postprocess'");
     }
-    
+
 }

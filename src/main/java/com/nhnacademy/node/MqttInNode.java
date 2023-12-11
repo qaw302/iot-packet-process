@@ -71,7 +71,7 @@ public class MqttInNode extends InputNode {
 
             String topicDirectory = "application";
             // (sOptions.getApplicationName() != null ? sOptions.getApplicationName()
-            //         : "application");
+            // : "application");
 
             client.subscribe(topicDirectory + "/+/device/+/event/up/#", (topic, msg) -> {
                 try {
@@ -84,8 +84,10 @@ public class MqttInNode extends InputNode {
                     // log.trace(jsonObj.toString());
                     JsonMessage messageObject = new JsonMessage(jsonObj);
                     messageObject.setNodeName("MqttInNode");
-                    output(messageObject);
-                    log.info(messageObject.toString());
+                    for (int i = 0; i < getOutputCount(); i++) {
+                        output(messageObject, i);
+                        log.info(messageObject.toString());
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

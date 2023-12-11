@@ -14,12 +14,12 @@ public class SwitchNode extends InputOutputNode {
     private JSONObject nodeSetting;
 
     public SwitchNode(int inCount, int outCount, JSONObject nodeSetting) {
-        super(inCount, outCount);
+        super(outCount);
         this.nodeSetting = nodeSetting;
     }
 
     public SwitchNode(String name, int inCount, int outCount, JSONObject nodeSetting) {
-        super(name, inCount, outCount);
+        super(name, outCount);
         this.nodeSetting = nodeSetting;
     }
 
