@@ -24,6 +24,84 @@ image::./image/mqtt_to_mqtt.svg[]
 * IoT 서비스에서 가장 많이 사용되는 프로토콜로 이종의 서비스를 연결한다.
 * 서비스간 topic이나 데이터 구성이 다를 경우, 이에 대한 변경 작업을 수행한다.
 
+#### 동작 예
+
+* ChirpStack에서 받은 메시지는 다음과 같다.
+** topic
++
+[source,console]
+----
+application/9a87910d-fc6c-4f10-a6fd-a626a1ca6b4a/device/24e124743c210238/event/up
+----
+
+** message
++
+[source, json ]
+----
+{
+    "deduplicationId": "6690d6e1-72f2-4d95-9f2e-6bbb3f43fa63",
+    "time": "2023-12-11T04:57:17.980+00:00",
+    "deviceInfo": {
+        "tenantId": "a3e5ac43-3f8a-45da-91a6-e07b18cc6646",
+        "tenantName": "NHN Academy 경남",
+        "applicationId": "9a87910d-fc6c-4f10-a6fd-a626a1ca6b4a",
+        "applicationName": "NHNAcademyEMS",
+        "deviceProfileId": "0f1a08ca-4fb4-4b9d-a569-b197c94d010c",
+        "deviceProfileName": "WS302-915M-OTAA",
+        "deviceName": "강의실B(WS302-210238)",
+        "devEui": "24e124743c210238",
+        "deviceClassEnabled": "CLASS_A",
+        "tags": {
+            "place": "class_b",
+            "name": "강의실 B 왼쪽 앞",
+            "site": "nhnacademy",
+            "branch": "gyeongnam"
+        }
+    },
+    "devAddr": "0040ec58",
+    "adr": true,
+    "dr": 2,
+    "fCnt": 184843,
+    "fPort": 85,
+    "confirmed": false,
+    "data": "AXUoBVsBqgGSATEC",
+    "object": {
+        "batteryLevel": 40.0,
+        "mode": 1.0,
+        "lmax": 56.1,
+        "spl": 42.6,
+        "leq": 40.2
+    },
+    "rxInfo": [ ... ],
+    "txInfo": { ... } 
+}
+----
+
+* 메시지 중 SPL 센서 정보는 deviceInfo, tags, object 정보를 이용해 센서 정보를 수집이 가능하다.
++
+[cols="1,1,1,1,1"]
+|===
+^s|DevEui ^s|Site ^s|Branch ^s|Place ^s|Value
+^|24e124743c210238 ^|nhnacademy ^|gyeongnam ^|class_b ^|42.6
+|===
+
+* 위에서 추출된 정보를 이용해 TIG IoT platform에 전송될 메시지를 다음과 같이 생성 가능하다.
+** topic
++
+[source,console]
+----
+data/s/nhnacademy/b/gyeongnam/p/class_b/e/spl
+----
+** message 
++
+[source,json]
+----
+{
+    "time": 1702271161000,
+    "value": 42.6
+}
+----
+
 ### MQTT to MODBUS
 
 
@@ -33,6 +111,77 @@ image::./image/mqtt_to_mb.svg[]
 * 다양한 정보를 포함할 수 있는 MQTT와 register기반의 MODBUS간 상호 연동이 가능하도록 변환한다.
 * 상호 연동을 위한 정보를 데이터베이스에서 별도 관리한다.
 
+#### 동작 예
+
+* ChirpStack에서 받은 메시지는 다음과 같다.
+** topic
++
+[source,console]
+----
+application/9a87910d-fc6c-4f10-a6fd-a626a1ca6b4a/device/24e124743c210238/event/up
+----
+
+** message
++
+[source, json ]
+----
+{
+    "deduplicationId": "6690d6e1-72f2-4d95-9f2e-6bbb3f43fa63",
+    "time": "2023-12-11T04:57:17.980+00:00",
+    "deviceInfo": {
+        "tenantId": "a3e5ac43-3f8a-45da-91a6-e07b18cc6646",
+        "tenantName": "NHN Academy 경남",
+        "applicationId": "9a87910d-fc6c-4f10-a6fd-a626a1ca6b4a",
+        "applicationName": "NHNAcademyEMS",
+        "deviceProfileId": "0f1a08ca-4fb4-4b9d-a569-b197c94d010c",
+        "deviceProfileName": "WS302-915M-OTAA",
+        "deviceName": "강의실B(WS302-210238)",
+        "devEui": "24e124743c210238",
+        "deviceClassEnabled": "CLASS_A",
+        "tags": {
+            "place": "class_b",
+            "name": "강의실 B 왼쪽 앞",
+            "site": "nhnacademy",
+            "branch": "gyeongnam"
+        }
+    },
+    "devAddr": "0040ec58",
+    "adr": true,
+    "dr": 2,
+    "fCnt": 184843,
+    "fPort": 85,
+    "confirmed": false,
+    "data": "AXUoBVsBqgGSATEC",
+    "object": {
+        "batteryLevel": 40.0,
+        "mode": 1.0,
+        "lmax": 56.1,
+        "spl": 42.6,
+        "leq": 40.2
+    },
+    "rxInfo": [ ... ],
+    "txInfo": { ... } 
+}
+----
+* 메시지 중 SPL 센서 정보는 deviceInfo, tags, object 정보를 이용해 센서 정보를 수집이 가능하다.
++
+[cols="1,1,1,1,1,1"]
+|===
+^s|DevEui ^s|Site ^s|Branch ^s|Place ^s|Register Address ^s|Value
+^|24e124743c210238 ^|nhnacademy ^|gyeongnam ^|class_b ^|101 ^|42.6
+|===
+* MODBUS/TCP를 통해 SPL 값을 읽어 간다.
+** Function Code : 3
+** Register Address : 101
+** Quantity of Register : 1
+* 읽어온 값은 정수로서 실수로 변환한다.
++
+[source,console]
+----
+SPL = 426(Register Value) * 0.1 = 42.6
+----
+** MODBUS에서는 UINT16, INT16을 기본으로 사용하므로, 실수는 정수 범위내의 값으로 변환해서 제공한다.
+
 ### MODBUS to MQTT
 
 
@@ -40,6 +189,19 @@ image::./image/mb_to_mqtt.svg[]
 
 * 산업 현장에서 설치되어 운영되고 있는 자동화 설비에서 데이터를 가져와 최신 IoT platform에서 데이터를 가공할 수 있도록 지원한다.
 
+#### 동작 예
+
+* SPL 센서가 MODBUS/TCP를 이용해 데이터를 제공할 경우,  정보는 센서 정보는 다음과 같이 설정해 둔다.
++
+[cols="1,1,1,1,1,1"]
+|===
+^s|DevEui ^s|Site ^s|Branch ^s|Place ^s|Register Address ^s|Value
+^|24e124743c210238 ^|nhnacademy ^|gyeongnam ^|class_b ^|101 ^|42.6
+|===
+
+* 디바이스에서 SPL 값을 읽어 저장한다.
+* 이후 동작은 설정된 정보를 이용해 TIG IoT Platform에서 받을 수 있는 형태로 topic과 message를 생성하여 전송한다.
+ 
 ### MODBUS to MODBUS
 
 image::./image/mb_to_mb.svg[]
@@ -47,6 +209,18 @@ image::./image/mb_to_mb.svg[]
 * 산업 현장에서 설치되어 있는 수많은 자동화 설비들을 하나의 통합된 시스템으로 구성하기 위해서는 설정 정보의 변경이나 망 구성 변경등의 작업이 필요하다. 
 * 이러한 작업은 기존 설비 운영에 영향을 줄 수 있으므로, 기존 설비의 운영 상태를 유지하며 새로운 시스템 통합이 가능하도록 논리적 장치를 생성하여 지원한다.
 
+#### 동작 예
+
+* SPL 센서가 MODBUS/TCP를 이용해 데이터를 제공할 경우,  정보는 센서 정보는 다음과 같이 설정해 둔다.
++
+[cols="1,1,1,1,1,1,1,1,1"] 
+|===
+^s|DevEui ^s|Site ^s|Branch ^s|Place ^s|Unit ID ^s|Address ^s|Virtual ID ^|Virtual Address ^s|Value
+^|24e124743c210238 ^|nhnacademy ^|gyeongnam ^|class_b ^|10 ^|201 ^|1 ^|101 ^|42.6
+|===
+
+* Unit ID 10인 디바이스의 Register 201에서 SPL 값을 읽어 저장한다.
+* MODBUS/TCP slave(Server)로 디바이스 1번에 101의 요청이 들어올 경우, 해당 값을 전달한다.
 
 ## 요구 사항
 
