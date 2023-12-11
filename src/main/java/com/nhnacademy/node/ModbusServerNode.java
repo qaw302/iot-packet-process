@@ -10,6 +10,8 @@ import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import com.nhnacademy.system.ModbusFunctionCode;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -80,7 +82,7 @@ public class ModbusServerNode extends InputOutputNode {
     }
 
     @Override
-    public void postprocess(){
+    public void postprocess() {
         // todo
     }
 
@@ -251,7 +253,7 @@ public class ModbusServerNode extends InputOutputNode {
     }
 
     public static void main(String[] args) {
-        ModbusServer server = new ModbusServer(11502);
+        ModbusServerNode server = new ModbusServerNode(11502, 1, 1);
         server.start();
     }
 
