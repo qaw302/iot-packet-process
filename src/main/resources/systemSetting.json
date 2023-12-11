@@ -1,0 +1,18 @@
+{
+    "input": {
+        "topic": "application/#",
+        "applicationName": "+",
+        "sensors": [
+            "temperature",
+            "humidity",
+            "co2"
+        ],
+        "server": "tcp://ems.nhnacademy.com:1883"
+    },
+    "output": {
+        "server": "tcp://localhost"
+    },
+    "operationStatus": {
+        "statusReportInterval": ""
+    }
+}
