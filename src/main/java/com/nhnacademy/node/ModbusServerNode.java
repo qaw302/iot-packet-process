@@ -1,14 +1,17 @@
 package com.nhnacademy.node;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Set;
 
 import com.nhnacademy.system.ModbusFunctionCode;
 
@@ -21,12 +24,10 @@ public class ModbusServerNode extends InputOutputNode {
     private static final String LENGTH = "length";
     private static final byte UNIT_ID = 1; // slave 장치의 ID , 즉 서버의 아이디
     private static byte[] tempDB = new byte[40000];
-    private BufferedInputStream inputStream;
-    private BufferedOutputStream outputStream;
-    private ServerSocket serverSocket;
-    private Socket socket;
     private int port;
     private HashMap<String, byte[]> headerMap;
+    private Selector selector;
+    private ServerSocketChannel serverSocketChannel;
 
     public ModbusServerNode(int port, int inCount, int outCount) {
         super(inCount, outCount);
@@ -36,12 +37,15 @@ public class ModbusServerNode extends InputOutputNode {
     @Override
     public void preprocess() {
         try {
-            serverSocket = new ServerSocket(port);
-            socket = serverSocket.accept();
-            inputStream = new BufferedInputStream(socket.getInputStream());
-            outputStream = new BufferedOutputStream(socket.getOutputStream());
+            selector = Selector.open();
+
+            serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.configureBlocking(false);
+            serverSocketChannel.socket().bind(new InetSocketAddress(port));
+
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             headerMap = new HashMap<>();
-            log.trace("port : " + port + " modbus server connected");
+            log.trace("port : " + port + " modbus server started");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -50,32 +54,29 @@ public class ModbusServerNode extends InputOutputNode {
 
     @Override
     public void process() {
-
-        if()
         try {
-            while (socket.isConnected()) {
-                byte[] inputBuffer = new byte[1024];
-                int receivedLength = inputStream.read(inputBuffer, 0, inputBuffer.length);
-                if (receivedLength > 0) {
-                    log.trace(Arrays.toString(inputBuffer));
+            while (!Thread.interrupted()) {
+                selector.select();
 
-                    parseHeader(inputBuffer);
-                    int length = (headerMap.get(LENGTH)[0] << 8) | headerMap.get(LENGTH)[1] & 0xFF;
-                    byte[] adu = new byte[6 + length];
-                    System.arraycopy(inputBuffer, 0, adu, 0, 6 + length);
+                Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
-                    log.info("request : " + Arrays.toString(adu));
-                    byte[] response = parsePDU(adu);
+                while (keyIterator.hasNext()) {
+                    SelectionKey key = keyIterator.next();
 
-                    log.info("response : " + Arrays.toString(response));
-                    outputStream.write(response);
-                    outputStream.flush();
+                    if (key.isAcceptable()) {
+                        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                        SocketChannel clientChannel = serverChannel.accept();
+                        clientChannel.configureBlocking(false);
+                        parseData(key, clientChannel);
+
+                    } else if (key.isReadable()) {
+                        SocketChannel clientChannel = (SocketChannel) key.channel();
+                        parseData(key, clientChannel);
+                    }
+                    keyIterator.remove();
                 }
             }
-            log.trace("socket close");
-            this.socket.close();
-            this.serverSocket.close();
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,7 +84,37 @@ public class ModbusServerNode extends InputOutputNode {
 
     @Override
     public void postprocess() {
-        // todo
+        try {
+            serverSocketChannel.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void parseData(SelectionKey key, SocketChannel clientChannel) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        buffer.clear();
+        int bytesRead = clientChannel.read(buffer);
+
+        if (bytesRead > 0) {
+            buffer.flip();
+            byte[] data = new byte[bytesRead];
+            buffer.get(data); // data에 buffer를 저장
+
+            parseHeader(data);
+            log.info("request : " + Arrays.toString(data));
+            byte[] response = parsePDU(data);
+            log.info("response : " + Arrays.toString(response));
+
+            ByteBuffer outputBuffer = ByteBuffer.wrap(response);
+            while (outputBuffer.hasRemaining()) {
+                clientChannel.write(outputBuffer);
+            }
+        } else if (bytesRead == -1) {
+            log.info("No data received");
+            key.cancel();
+            clientChannel.close();
+        }
     }
 
     public void parseHeader(byte[] inputBuffer) {
