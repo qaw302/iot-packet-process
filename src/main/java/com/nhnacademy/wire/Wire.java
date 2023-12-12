@@ -5,7 +5,6 @@ import java.util.Queue;
 
 import com.nhnacademy.message.Message;
 
-
 public class Wire {
     Queue<Message> messageQueue;
 
@@ -19,10 +18,15 @@ public class Wire {
         notifyAll();
     }
 
-    public synchronized boolean hasMessage() throws InterruptedException {
+    public synchronized boolean hasMessage() {
         while (true) {
             if (messageQueue.isEmpty()) {
-                wait();
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             } else {
                 break;
             }

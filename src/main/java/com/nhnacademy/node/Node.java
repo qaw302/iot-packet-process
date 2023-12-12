@@ -18,13 +18,14 @@ public abstract class Node {
         log.trace("create node : {}", id);
     }
 
+    Node(String id) {
+        this.id = id;
+        log.trace("create node : {}", id);
+    }
+
     public String getId() {
         return id;
     }
-
-    public abstract String getName();
-
-    public abstract void setName(String name);
 
     public static int getCount() {
         return count;
