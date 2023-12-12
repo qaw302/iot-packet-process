@@ -55,27 +55,31 @@ public class ModbusServerNode extends InputOutputNode {
     @Override
     public void process() {
         try {
-            while (!Thread.interrupted()) {
-                selector.select();
+            selector.select();
 
-                Set<SelectionKey> selectedKeys = selector.selectedKeys();
-                Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+            Set<SelectionKey> selectedKeys = selector.selectedKeys();
+            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
-                while (keyIterator.hasNext()) {
-                    SelectionKey key = keyIterator.next();
+            while (keyIterator.hasNext()) {
+                SelectionKey key = keyIterator.next();
 
-                    if (key.isAcceptable()) {
-                        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
-                        SocketChannel clientChannel = serverChannel.accept();
-                        clientChannel.configureBlocking(false);
-                        parseData(key, clientChannel);
+                if (key.isAcceptable()) {
+                    log.trace("socket connection");
 
-                    } else if (key.isReadable()) {
-                        SocketChannel clientChannel = (SocketChannel) key.channel();
-                        parseData(key, clientChannel);
-                    }
-                    keyIterator.remove();
+                    ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                    SocketChannel clientChannel = serverChannel.accept();
+                    clientChannel.configureBlocking(false);
+                    parseData(key, clientChannel);
+
+                    clientChannel.register(selector, SelectionKey.OP_READ);
+
+                } else if (key.isReadable()) {
+                    log.trace("pipe connection");
+
+                    SocketChannel clientChannel = (SocketChannel) key.channel();
+                    parseData(key, clientChannel);
                 }
+                keyIterator.remove();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -111,9 +115,10 @@ public class ModbusServerNode extends InputOutputNode {
                 clientChannel.write(outputBuffer);
             }
         } else if (bytesRead == -1) {
-            log.info("No data received");
             key.cancel();
             clientChannel.close();
+        } else {
+            log.info("No data received bytesRead : " + bytesRead);
         }
     }
 
