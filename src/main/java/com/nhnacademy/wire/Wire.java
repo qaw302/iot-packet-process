@@ -5,6 +5,7 @@ import java.util.Queue;
 
 import com.nhnacademy.message.Message;
 
+
 public class Wire {
     Queue<Message> messageQueue;
 
@@ -13,11 +14,19 @@ public class Wire {
         messageQueue = new LinkedList<>();
     }
 
-    public void put(Message message) {
+    public synchronized void put(Message message) {
         messageQueue.add(message);
+        notifyAll();
     }
 
-    public boolean hasMessage() {
+    public synchronized boolean hasMessage() throws InterruptedException {
+        while (true) {
+            if (messageQueue.isEmpty()) {
+                wait();
+            } else {
+                break;
+            }
+        }
         return !messageQueue.isEmpty();
     }
 
