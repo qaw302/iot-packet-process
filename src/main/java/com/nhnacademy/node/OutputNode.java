@@ -7,7 +7,7 @@ import com.nhnacademy.exception.InvalidArgumentException;
 import com.nhnacademy.wire.Wire;
 
 public abstract class OutputNode extends ActiveNode {
-    private List<Wire> inputPort;
+    List<Wire> inputPort;
 
     protected OutputNode(String id) {
         super(id);

@@ -13,12 +13,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.nhnacademy.message.JsonMessage;
+import com.nhnacademy.message.Message;
 import com.nhnacademy.system.ModbusFunctionCode;
+import com.nhnacademy.wire.Wire;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ModbusServerNode extends InputOutputNode {
+public class ModbusServerNode extends OutputNode {
     private static final String TRANSACTION_ID = "transactionId";
     private static final String PROTOCOL_ID = "protocolId";
     private static final String LENGTH = "length";
@@ -29,8 +32,8 @@ public class ModbusServerNode extends InputOutputNode {
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
 
-    public ModbusServerNode(int port, int inCount, int outCount) {
-        super(inCount, outCount);
+    public ModbusServerNode(int port) {
+        super();
         this.port = port;
     }
 
@@ -55,8 +58,8 @@ public class ModbusServerNode extends InputOutputNode {
     @Override
     public void process() {
         try {
+            inputWireToSocket();
             selector.select();
-
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
             Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
@@ -64,18 +67,13 @@ public class ModbusServerNode extends InputOutputNode {
                 SelectionKey key = keyIterator.next();
 
                 if (key.isAcceptable()) {
-                    log.trace("socket connection");
-
                     ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
                     SocketChannel clientChannel = serverChannel.accept();
                     clientChannel.configureBlocking(false);
                     parseData(key, clientChannel);
-
                     clientChannel.register(selector, SelectionKey.OP_READ);
 
                 } else if (key.isReadable()) {
-                    log.trace("pipe connection");
-
                     SocketChannel clientChannel = (SocketChannel) key.channel();
                     parseData(key, clientChannel);
                 }
@@ -93,6 +91,39 @@ public class ModbusServerNode extends InputOutputNode {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void inputWireToSocket() throws IOException {
+        for (Wire wire : inputPort) {
+            while (wire.hasMessage()) {
+                Message message = wire.get();
+                if (message instanceof JsonMessage) {
+                    byte[] data = jsonMessageToByte((JsonMessage) message);
+
+                    parseHeader(data);
+                    log.info("request : " + Arrays.toString(data));
+
+                    byte[] response = parsePDU(data);
+                    log.info("response : " + Arrays.toString(response));
+                }
+            }
+        }
+    }
+
+    private byte[] jsonMessageToByte(JsonMessage message) {
+        int address = (int) message.getJsonObject().get("address");
+        int value = (int) message.getJsonObject().get("value");
+        byte[] data = new byte[] { 0, 0, 0, 0, 0, 6, 1, 6, 0, 0, 0, 0 };
+        ByteBuffer b = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN);
+        b.clear();
+        b.putInt(address);
+        data[8] = b.get(3);
+        data[9] = b.get(4);
+        b.clear();
+        b.putInt(value);
+        data[10] = b.get(3);
+        data[11] = b.get(4);
+        return data;
     }
 
     private void parseData(SelectionKey key, SocketChannel clientChannel) throws IOException {
@@ -289,7 +320,7 @@ public class ModbusServerNode extends InputOutputNode {
     }
 
     public static void main(String[] args) {
-        ModbusServerNode server = new ModbusServerNode(11502, 1, 1);
+        ModbusServerNode server = new ModbusServerNode(11502);
         server.start();
     }
 
