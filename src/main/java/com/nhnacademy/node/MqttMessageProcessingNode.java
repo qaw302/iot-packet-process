@@ -25,7 +25,6 @@ public class MqttMessageProcessingNode extends InputOutputNode {
         try {
             Reader reader = new FileReader("src/main/resources/registerAddressMappingTable.json");
             registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-            System.out.println(registerAddressMappingTable);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -90,7 +89,8 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
                 JSONObject result = new JSONObject();
                 result.put("payload", payload);
-                System.out.println(result);
+
+                output(0, new JsonMessage(result));
             }
 
         }

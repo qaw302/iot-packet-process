@@ -79,8 +79,13 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
             if (registerAddress.equals("undefined") || value.equals("undefined"))
                 continue;
             JSONObject payload = new JSONObject();
-            // dfsFindKey(registerAddressMappingTable, Integer.parseInt(registerAddress));
-
+            String[] keyWord = getKeyWord(registerAddressMappingTable, Long.parseLong(registerAddress));
+            payload.put(payload, keyWord[0]);
+            payload.put("place", keyWord[1]);
+            payload.put("devEui", keyWord[2]);
+            payload.put("sensor", keyWord[3]);
+            payload.put("value", value);
+            payload.put("address", registerAddress);
         }
     }
 
