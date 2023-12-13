@@ -3,6 +3,7 @@ package com.nhnacademy.node;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,7 +14,7 @@ import com.nhnacademy.message.Message;
 import com.nhnacademy.wire.Wire;
 
 public class ModbusMapperRegisterToKeyword extends InputOutputNode {
-    JSONObject registerAddressMappingTable;
+    public JSONObject registerAddressMappingTable;
 
     protected ModbusMapperRegisterToKeyword(String id) {
         super(id, 1);
@@ -21,7 +22,6 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
         try {
             Reader reader = new FileReader("src/main/resources/registerAddressMappingTable.json");
             registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-            System.out.println(registerAddressMappingTable);
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -29,6 +29,33 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public String getKey(JSONObject jsonObject, long keyValue, String keyWord) {
+        String result = null;
+        for (Object key : jsonObject.keySet()) {
+            if (jsonObject.get(key) instanceof JSONObject) {
+                result = getKey((JSONObject) jsonObject.get(key), keyValue, keyWord + key + " ");
+            } else {
+                if (jsonObject.get(key).equals(keyValue)) {
+                    result = keyWord + key;
+                }
+            }
+            if (result != null)
+                break;
+        }
+        return result;
+    }
+
+    public String[] getKeyWord(JSONObject jsonObject, long keyValue) {
+        String result = getKey((JSONObject) jsonObject.get("branch"), keyValue / 100 * 100, "");
+        for (Object key : ((JSONObject) jsonObject.get("sensors")).keySet()) {
+            if (((JSONObject) jsonObject.get("sensors")).get(key).equals(keyValue % 100)) {
+                result += " " + key;
+            }
+        }
+        return result.split(" ");
+
     }
 
     @Override
@@ -49,15 +76,10 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
                     new String[] { "payload", "registerAddress" }).get("registerAddress").toString();
             String value = JsonMessage.getDestJsonObject(jsonObject,
                     new String[] { "payload", "value" }).get("value").toString();
-            if(registerAddress.equals("undefined") || value.equals("undefined"))
+            if (registerAddress.equals("undefined") || value.equals("undefined"))
                 continue;
-                JSONObject payload = new JSONObject();
-            for(int j = 10000;j>0;j/=10) {
-                long addr = Long.parseLong(registerAddress)/j%10;
-                if(j==10000){
-                    payload.put("branch", registerAddressMappingTable.get("branch").toString());
-                }
-            }
+            JSONObject payload = new JSONObject();
+            // dfsFindKey(registerAddressMappingTable, Integer.parseInt(registerAddress));
 
         }
     }
@@ -66,4 +88,11 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
     void postprocess() {
     }
 
+    public static void main(String[] args) {
+        ModbusMapperRegisterToKeyword modbusMapperRegisterToKeyword = new ModbusMapperRegisterToKeyword("1");
+        String[] result =  modbusMapperRegisterToKeyword.getKeyWord(modbusMapperRegisterToKeyword.registerAddressMappingTable, 11101);
+        for(String s : result) {
+            System.out.println(s);
+        }
+    }
 }
