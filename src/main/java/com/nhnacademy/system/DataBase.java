@@ -109,7 +109,7 @@ public class DataBase {
         jsonObject.put("devEui", "af87dsaf8sda876");
         jsonObject.put("sensor", "temperature");
         jsonObject.put("address", "11101");
-        jsonObject.put("value", "25.5");
+        jsonObject.put("value", 25.5);
         dataBase.addData(jsonObject);
         JSONObject jsonObject2 = new JSONObject();
         jsonObject2.put("branch", "gyeongnam");
@@ -118,7 +118,7 @@ public class DataBase {
         jsonObject2.put("devEui", "bsefs352");
         jsonObject2.put("sensor", "co2");
         jsonObject2.put("address", "11203");
-        jsonObject2.put("value", "500");
+        jsonObject2.put("value", 500);
         dataBase.addData(jsonObject2);
         System.out.println(dataBase.getData("af87dsaf8sda876"));
         System.out.println(dataBase.getData("bsefs352"));
