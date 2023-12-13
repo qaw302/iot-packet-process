@@ -3,6 +3,7 @@ package com.nhnacademy.node;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -64,25 +65,28 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                         new String[] { "payload", "object", sensor });
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
-                if (!registerAddressMappingTable.containsKey(branch) || !registerAddressMappingTable.containsKey(place)
-                        || !registerAddressMappingTable.containsKey(devEui)
-                        || !registerAddressMappingTable.containsKey(sensor)) {
+                if (!((JSONObject) registerAddressMappingTable.get("branch")).containsKey(branch)
+                        || !((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch")).get(branch))
+                                .containsKey(place)
+                        || !((JSONObject) ((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch"))
+                                .get(branch)).get(place))
+                                .containsKey(devEui)
+                        || !((JSONObject) registerAddressMappingTable.get("sensors")).containsKey(sensor)) {
                     System.out.println(branch + " " + site + " " + place + " " + devEui + " " + sensor);
                     continue;
                 }
                 double value = (double) destObject.get(sensor);
                 JSONObject payload = new JSONObject();
-                payload.put("registerAddress", (long) registerAddressMappingTable.get(branch)
-                        + (long) registerAddressMappingTable.get(place)
-                        + (long) registerAddressMappingTable.get(devEui)
-                        + (long) registerAddressMappingTable.get(sensor));
+                payload.put("registerAddress",
+                        (long) ((JSONObject) ((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch"))
+                                .get(branch)).get(place)).get(devEui)
+                                + (long) ((JSONObject) registerAddressMappingTable.get("sensors")).get(sensor));
                 payload.put("branch", branch);
                 payload.put("site", site);
                 payload.put("place", place);
                 payload.put("devEui", devEui);
                 payload.put("sensor", sensor);
                 payload.put("value", value);
-                
 
                 JSONObject result = new JSONObject();
                 result.put("payload", payload);
