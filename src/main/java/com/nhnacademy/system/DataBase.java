@@ -42,6 +42,10 @@ public class DataBase {
                 break;
             }
         }
+        if (defaultKeyIndex == -1) {
+            log.info("defaultKey is not in data");
+            return;
+        }
         for (int i = 0; i < rowSize; i++) {
             if (data[i][defaultKeyIndex].equals(jsonObject.get(defaultKey))) {
                 for (int j = 0; j < colSize; j++) {
@@ -74,7 +78,8 @@ public class DataBase {
             }
         }
         if (defaultKeyIndex == -1) {
-            throw new NullDataBaseException();
+            log.info("defaultKey is not in data");
+            return null;
         }
         for (int i = 1; i < rowSize; i++) {
             if (data[i][defaultKeyIndex].equals(defaultKey)) {
