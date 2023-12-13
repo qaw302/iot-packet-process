@@ -13,11 +13,24 @@ public class Wire {
         messageQueue = new LinkedList<>();
     }
 
-    public void put(Message message) {
+    public synchronized void put(Message message) {
         messageQueue.add(message);
+        notifyAll();
     }
 
-    public boolean hasMessage() {
+    public synchronized boolean hasMessage() {
+        while (true) {
+            if (messageQueue.isEmpty()) {
+                try {
+                    wait();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            } else {
+                break;
+            }
+        }
         return !messageQueue.isEmpty();
     }
 
