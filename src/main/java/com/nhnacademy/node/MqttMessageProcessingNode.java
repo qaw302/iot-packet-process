@@ -80,7 +80,9 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                 payload.put("site", site);
                 payload.put("place", place);
                 payload.put("devEui", devEui);
+                payload.put("sensor", sensor);
                 payload.put("value", value);
+                
 
                 JSONObject result = new JSONObject();
                 result.put("payload", payload);
