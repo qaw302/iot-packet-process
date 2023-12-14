@@ -1,9 +1,10 @@
 package com.nhnacademy.node;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -16,22 +17,13 @@ import com.nhnacademy.wire.Wire;
 
 public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;
-    JSONObject registerAddressMappingTable;
+    RegisterAddressMappingTable registerAddressMappingTable;
 
     protected MqttMessageProcessingNode(String id) {
         super(id, 1);
         sensors = new String[] { "temperature", "humidity", "co2" };
-        JSONParser jsonParser = new JSONParser();
-        try {
-            Reader reader = new FileReader("src/main/resources/registerAddressMappingTable.json");
-            registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        registerAddressMappingTable = new RegisterAddressMappingTable(
+                "src/main/resources/registerAddressMappingTable2.json");
     }
 
     @Override
@@ -64,22 +56,12 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                         new String[] { "payload", "object", sensor });
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
-                if (!((JSONObject) registerAddressMappingTable.get("branch")).containsKey(branch)
-                        || !((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch")).get(branch))
-                                .containsKey(place)
-                        || !((JSONObject) ((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch"))
-                                .get(branch)).get(place))
-                                .containsKey(devEui)
-                        || !((JSONObject) registerAddressMappingTable.get("sensors")).containsKey(sensor)) {
-                    System.out.println(branch + " " + site + " " + place + " " + devEui + " " + sensor);
-                    continue;
-                }
+                String dictionaryKey = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
+                if (!registerAddressMappingTable.hasKey(dictionaryKey))
+                    registerAddressMappingTable.writeKey(dictionaryKey);
                 double value = (double) destObject.get(sensor);
                 JSONObject payload = new JSONObject();
-                payload.put("registerAddress",
-                        (long) ((JSONObject) ((JSONObject) ((JSONObject) registerAddressMappingTable.get("branch"))
-                                .get(branch)).get(place)).get(devEui)
-                                + (long) ((JSONObject) registerAddressMappingTable.get("sensors")).get(sensor));
+                payload.put("registerAddress", registerAddressMappingTable.getRegisterAddressMappingTable().get(dictionaryKey));
                 payload.put("branch", branch);
                 payload.put("site", site);
                 payload.put("place", place);
@@ -98,6 +80,10 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
     @Override
     void postprocess() {
+    }
+
+    public static void main(String[] args) {
+        MqttMessageProcessingNode mqttMessageProcessingNode = new MqttMessageProcessingNode("test");
     }
 
 }
