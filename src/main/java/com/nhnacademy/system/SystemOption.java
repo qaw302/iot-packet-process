@@ -166,7 +166,6 @@ public class SystemOption {
         log.info(nodeList.entrySet().toString());
         log.info(wireInfo.entrySet().toString());
         int inputNodeIdx = 0;
-        int outputNodeIdx = 0;
         int inputOutputNodeIdx = 0;
         Wire[] wires;
         for (Map.Entry<String, Object> entry : nodeList.entrySet()) {
@@ -175,32 +174,35 @@ public class SystemOption {
             if (node == null) {
                 continue;
             }
+
             if (node instanceof InputNode) {
                 InputNode inputNode = (InputNode) node;
-                // log.info(wireInfo.get(id).size() + "");
-                // log.info(((JSONArray) wireInfo.get(id).get(0)).size() + "");
-                // log.info(((JSONArray) wireInfo.get(id)).toJSONString());
                 wires = createWires(wireInfo.get(id));
-
-                for (Object wireArray : wireInfo.get(id)) {
-                    for (int i = 0; i < ((JSONArray) wireArray).size(); i++) {
-                        ((InputNode) node).connectOutputWire(i, wires[inputNodeIdx]);
-
-                        if (nodeList.get(((JSONArray) wireArray).get(i).toString()) instanceof OutputNode) {
-                            ((OutputNode) nodeList.get(((JSONArray) wireArray).get(i).toString()))
-                                    .connectInputWire(wires[inputNodeIdx++]);
-                        } else if (nodeList.get(((JSONArray) wireArray).get(i).toString()) instanceof InputOutputNode) {
-                            ((InputOutputNode) nodeList.get(((JSONArray) wireArray).get(i).toString()))
-                                    .connectInputWire(wires[inputNodeIdx++]);
-                        }
-                    }
-                }
-
-            } else if (node instanceof OutputNode) {
-                OutputNode outputNode = (OutputNode) node;
-
+                connectWires(inputNode, wires, wireInfo.get(id), nodeList, inputNodeIdx);
             } else if (node instanceof InputOutputNode) {
                 InputOutputNode IONode = (InputOutputNode) node;
+                wires = createWires(wireInfo.get(id));
+                connectWires(IONode, wires, wireInfo.get(id), nodeList, inputOutputNodeIdx);
+            }
+        }
+    }
+
+    private void connectWires(Node node, Wire[] wires, JSONArray wireArrayInfo, Map<String, Object> nodeList,
+            int wireIndex) {
+        for (Object wireArray : wireArrayInfo) {
+            for (int i = 0; i < ((JSONArray) wireArray).size(); i++) {
+                if (node instanceof InputNode) {
+                    ((InputNode) node).connectOutputWire(i, wires[wireIndex]);
+                } else if (node instanceof InputOutputNode) {
+                    ((InputOutputNode) node).connectOutputWire(i, wires[wireIndex]);
+                }
+
+                Object targetNode = nodeList.get(((JSONArray) wireArray).get(i).toString());
+                if (targetNode instanceof OutputNode) {
+                    ((OutputNode) targetNode).connectInputWire(wires[wireIndex++]);
+                } else if (targetNode instanceof InputOutputNode) {
+                    ((InputOutputNode) targetNode).connectInputWire(wires[wireIndex++]);
+                }
             }
         }
     }
