@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -13,21 +15,34 @@ import org.json.simple.parser.ParseException;
 public class RegisterAddressMappingTable {
     private JSONObject jsonObject;
     private String path;
+    private static Map<String, RegisterAddressMappingTable> registerAddressMappingTableMap = new HashMap<>();
 
-    public RegisterAddressMappingTable(String path) {
+    private RegisterAddressMappingTable() {
         super();
-        this.path = path;
+    }
+
+    public static RegisterAddressMappingTable getRegisterAddressMappingTable(String path) {
+        if (!registerAddressMappingTableMap.containsKey(path)) {
+            RegisterAddressMappingTable registerAddressMappingTable = new RegisterAddressMappingTable();
+            registerAddressMappingTable.path = path;
+            registerAddressMappingTable.readFile();
+            registerAddressMappingTableMap.put(path, registerAddressMappingTable);
+        }
+        return registerAddressMappingTableMap.get(path);
+    }
+
+    private void readFile() {
         File file = new File(path);
         if (file.exists()) {
             try {
                 JSONParser jsonParser = new JSONParser();
                 Reader reader = new FileReader(file);
                 jsonObject = (JSONObject) jsonParser.parse(reader);
+                reader.close();
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             } catch (ParseException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             }
         } else {
@@ -43,10 +58,10 @@ public class RegisterAddressMappingTable {
         return jsonObject.containsKey(key);
     }
 
-    public boolean hasAddress(Long num){
-        for(Object k : getRegisterAddressMappingTable().keySet()){
-            if(getRegisterAddressMappingTable().get(k) instanceof Long){
-                if((long)getRegisterAddressMappingTable().get(k) == num){
+    public boolean hasAddress(Long num) {
+        for (Object k : getRegisterAddressMappingTable().keySet()) {
+            if (getRegisterAddressMappingTable().get(k) instanceof Long) {
+                if ((long) getRegisterAddressMappingTable().get(k) == num) {
                     return true;
                 }
             }
@@ -74,5 +89,6 @@ public class RegisterAddressMappingTable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        readFile();
     }
 }

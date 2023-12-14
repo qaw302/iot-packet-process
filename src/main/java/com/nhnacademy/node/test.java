@@ -13,5 +13,10 @@ public class test {
         mqttMessageProcessingNode.connectInputWire(wire);
         mqttInNode.start();
         mqttMessageProcessingNode.start();
+        ModbusMapperKeywordToRegister modbusMapperKeywordToRegister = new ModbusMapperKeywordToRegister("3");
+        Wire wire1 = new Wire();
+        mqttMessageProcessingNode.connectOutputWire(0, wire1);
+        modbusMapperKeywordToRegister.connectInputWire(wire1);
+        modbusMapperKeywordToRegister.start();
     }
 }

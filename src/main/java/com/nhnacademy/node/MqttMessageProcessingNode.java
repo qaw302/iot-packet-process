@@ -1,14 +1,6 @@
 package com.nhnacademy.node;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
@@ -22,8 +14,8 @@ public class MqttMessageProcessingNode extends InputOutputNode {
     protected MqttMessageProcessingNode(String id) {
         super(id, 1);
         sensors = new String[] { "temperature", "humidity", "co2" };
-        registerAddressMappingTable = new RegisterAddressMappingTable(
-                "src/main/resources/registerAddressMappingTable2.json");
+        registerAddressMappingTable = RegisterAddressMappingTable
+                .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
     }
 
     @Override
@@ -57,11 +49,14 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
                 String dictionaryKey = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
+                System.out.println(dictionaryKey);
                 if (!registerAddressMappingTable.hasKey(dictionaryKey))
                     registerAddressMappingTable.writeKey(dictionaryKey);
+
                 double value = (double) destObject.get(sensor);
                 JSONObject payload = new JSONObject();
-                payload.put("registerAddress", registerAddressMappingTable.getRegisterAddressMappingTable().get(dictionaryKey));
+                payload.put("registerAddress",
+                        registerAddressMappingTable.getRegisterAddressMappingTable().get(dictionaryKey));
                 payload.put("branch", branch);
                 payload.put("site", site);
                 payload.put("place", place);

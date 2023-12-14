@@ -1,61 +1,22 @@
 package com.nhnacademy.node;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.util.HashMap;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.wire.Wire;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ModbusMapperRegisterToKeyword extends InputOutputNode {
-    public JSONObject registerAddressMappingTable;
+    private RegisterAddressMappingTable registerAddressMappingTable;
 
     protected ModbusMapperRegisterToKeyword(String id) {
         super(id, 1);
-        JSONParser jsonParser = new JSONParser();
-        try {
-            Reader reader = new FileReader("src/main/resources/registerAddressMappingTable.json");
-            registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    public String getKey(JSONObject jsonObject, long keyValue, String keyWord) {
-        String result = null;
-        for (Object key : jsonObject.keySet()) {
-            if (jsonObject.get(key) instanceof JSONObject) {
-                result = getKey((JSONObject) jsonObject.get(key), keyValue, keyWord + key + " ");
-            } else {
-                if (jsonObject.get(key).equals(keyValue)) {
-                    result = keyWord + key;
-                }
-            }
-            if (result != null)
-                break;
-        }
-        return result;
-    }
-
-    public String[] getKeyWord(JSONObject jsonObject, long keyValue) {
-        String result = getKey((JSONObject) jsonObject.get("branch"), keyValue / 100 * 100, "");
-        for (Object key : ((JSONObject) jsonObject.get("sensors")).keySet()) {
-            if (((JSONObject) jsonObject.get("sensors")).get(key).equals(keyValue % 100)) {
-                result += " " + key;
-            }
-        }
-        return result.split(" ");
-
+        registerAddressMappingTable = RegisterAddressMappingTable
+                .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
     }
 
     @Override
@@ -78,17 +39,23 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
                     new String[] { "payload", "value" }).get("value").toString();
             if (registerAddress.equals("undefined") || value.equals("undefined"))
                 continue;
+            if (!registerAddressMappingTable.hasAddress(Long.parseLong(registerAddress))) {
+                log.info("address not found");
+                continue;
+            }
             JSONObject payload = new JSONObject();
-            String[] keyWord = getKeyWord(registerAddressMappingTable, Long.parseLong(registerAddress));
-            payload.put(payload, keyWord[0]);
-            payload.put("place", keyWord[1]);
-            payload.put("devEui", keyWord[2]);
-            payload.put("sensor", keyWord[3]);
+            String key = registerAddressMappingTable.getRegisterAddressMappingTable().get(registerAddress).toString();
+            String[] keys = key.split("/");
+            payload.put("branch", keys[0]);
+            payload.put("site", keys[1]);
+            payload.put("place", keys[2]);
+            payload.put("devEui", keys[3]);
+            payload.put("sensor", keys[4]);
             payload.put("value", value);
             payload.put("address", registerAddress);
-            payload.put("site","");
             JSONObject result = new JSONObject();
             result.put("payload", payload);
+
             output(0, new JsonMessage(result));
         }
     }
@@ -99,9 +66,5 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
 
     public static void main(String[] args) {
         ModbusMapperRegisterToKeyword modbusMapperRegisterToKeyword = new ModbusMapperRegisterToKeyword("1");
-        String[] result =  modbusMapperRegisterToKeyword.getKeyWord(modbusMapperRegisterToKeyword.registerAddressMappingTable, 11101);
-        for(String s : result) {
-            System.out.println(s);
-        }
     }
 }

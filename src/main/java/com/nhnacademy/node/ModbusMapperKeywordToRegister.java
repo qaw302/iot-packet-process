@@ -1,18 +1,21 @@
 package com.nhnacademy.node;
 
-
 import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.wire.Wire;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class ModbusMapperKeywordToRegister extends InputOutputNode {
     private RegisterAddressMappingTable registerAddressMappingTable;
 
     protected ModbusMapperKeywordToRegister(String id) {
         super(id, 1);
-        registerAddressMappingTable = new RegisterAddressMappingTable("src/main/resources/registerAddressMappingTable2.json");
+        registerAddressMappingTable = RegisterAddressMappingTable
+                .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
     }
 
     @Override
@@ -31,6 +34,8 @@ public class ModbusMapperKeywordToRegister extends InputOutputNode {
             JSONObject jsonObject = ((JsonMessage) message).getJsonObject();
             String branch = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "branch" })
                     .get("branch").toString();
+            String site = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "site" }).get("site")
+                    .toString();
             String place = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "place" }).get("place")
                     .toString();
             String devEui = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "devEui" })
@@ -38,17 +43,19 @@ public class ModbusMapperKeywordToRegister extends InputOutputNode {
             String sensor = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "sensor" })
                     .get("sensor")
                     .toString();
-            long address = (long) ((JSONObject) JsonMessage.getDestJsonObject(registerAddressMappingTable,
-                    new String[] { "branch", branch, place, devEui }))
-                    .get(devEui);
-            address += (long) (JsonMessage.getDestJsonObject(registerAddressMappingTable,
-                    new String[] { "sensors", sensor })).get(sensor);
+            String key = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
+            if (!registerAddressMappingTable.hasKey(key)) {
+                log.info("key not found");
+                continue;
+            }
             JSONObject result = new JSONObject();
             JSONObject payload = new JSONObject();
-            payload.put("registerAddress", address);
+            payload.put("registerAddress",
+                    (long) registerAddressMappingTable.getRegisterAddressMappingTable().get(key));
             payload.put("value", JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "value" })
                     .get("value"));
             result.put("payload", payload);
+            
             output(0, new JsonMessage(result));
         }
     }
