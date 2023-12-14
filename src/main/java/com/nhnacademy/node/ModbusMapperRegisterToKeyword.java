@@ -86,6 +86,10 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
             payload.put("sensor", keyWord[3]);
             payload.put("value", value);
             payload.put("address", registerAddress);
+            payload.put("site","");
+            JSONObject result = new JSONObject();
+            result.put("payload", payload);
+            output(0, new JsonMessage(result));
         }
     }
 
