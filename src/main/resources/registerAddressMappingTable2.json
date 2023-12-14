@@ -1,16 +1,10 @@
 {
-    "gyeongnam\/nhnacademy\/class_a\/24e124785c421885\/humidity": 5,
-    "gyeongnam\/nhnacademy\/class_a\/24e124128c067999\/temperature": 8,
-    "address": 15,
-    "gyeongnam\/nhnacademy\/class_a\/24e124785c421885\/temperature": 4,
-    "gyeongnam\/nhnacademy\/server_room\/24e124136d151368\/humidity": 3,
-    "gyeongnam\/nhnacademy\/class_a\/24e124128c067999\/co2": 10,
-    "gyeongnam\/nhnacademy\/class_a\/24e124785c389818\/temperature": 11,
-    "gyeongnam\/nhnacademy\/lobby\/24e124785c389010\/humidity": 7,
-    "gyeongnam\/nhnacademy\/class_a\/24e124126d152969\/temperature": 13,
-    "gyeongnam\/nhnacademy\/lobby\/24e124785c389010\/temperature": 6,
-    "gyeongnam\/nhnacademy\/class_a\/24e124128c067999\/humidity": 9,
-    "gyeongnam\/nhnacademy\/class_a\/24e124126d152969\/humidity": 14,
-    "gyeongnam\/nhnacademy\/class_a\/24e124785c389818\/humidity": 12,
-    "gyeongnam\/nhnacademy\/server_room\/24e124136d151368\/temperature": 2
+    "gyeongnam\/nhnacademy\/class_a\/24e124785c421885\/humidity": 6,
+    "gyeongnam\/nhnacademy\/class_a\/24e124126d152969\/temperature": 1,
+    "gyeongnam\/nhnacademy\/lobby\/24e124785c389010\/humidity": 8,
+    "gyeongnam\/nhnacademy\/class_a\/24e124785c421885\/temperature": 5,
+    "gyeongnam\/nhnacademy\/lobby\/24e124785c389010\/temperature": 7,
+    "gyeongnam\/nhnacademy\/server_room\/24e124136d151368\/humidity": 4,
+    "gyeongnam\/nhnacademy\/class_a\/24e124126d152969\/humidity": 2,
+    "gyeongnam\/nhnacademy\/server_room\/24e124136d151368\/temperature": 3
 }

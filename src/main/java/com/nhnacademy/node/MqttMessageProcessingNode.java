@@ -3,10 +3,8 @@ package com.nhnacademy.node;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -19,28 +17,13 @@ import com.nhnacademy.wire.Wire;
 
 public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;
-    JSONObject registerAddressMappingTable;
+    RegisterAddressMappingTable registerAddressMappingTable;
 
     protected MqttMessageProcessingNode(String id) {
         super(id, 1);
         sensors = new String[] { "temperature", "humidity", "co2" };
-        JSONParser jsonParser = new JSONParser();
-        File file = new File("src/main/resources/registerAddressMappingTable2.json");
-        if (file.exists()) {
-            try {
-                Reader reader = new FileReader(file);
-                registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-        } else {
-            registerAddressMappingTable = new JSONObject();
-            registerAddressMappingTable.put("address", (long) 1);
-        }
+        registerAddressMappingTable = new RegisterAddressMappingTable(
+                "src/main/resources/registerAddressMappingTable2.json");
     }
 
     @Override
@@ -74,21 +57,11 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
                 String dictionaryKey = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
-                if (!registerAddressMappingTable.containsKey("branch")) {
-                    registerAddressMappingTable.put(dictionaryKey, registerAddressMappingTable.get("address"));
-                    registerAddressMappingTable.put("address", (long) registerAddressMappingTable.get("address") + 1);
-                    try {
-                        FileWriter file = new FileWriter("src/main/resources/registerAddressMappingTable2.json");
-                        file.write(registerAddressMappingTable.toJSONString());
-                        file.flush();
-                        file.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+                if (!registerAddressMappingTable.hasKey(dictionaryKey))
+                    registerAddressMappingTable.writeKey(dictionaryKey);
                 double value = (double) destObject.get(sensor);
                 JSONObject payload = new JSONObject();
-                payload.put("registerAddress", registerAddressMappingTable.get(dictionaryKey));
+                payload.put("registerAddress", registerAddressMappingTable.getRegisterAddressMappingTable().get(dictionaryKey));
                 payload.put("branch", branch);
                 payload.put("site", site);
                 payload.put("place", place);
