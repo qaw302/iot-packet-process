@@ -43,6 +43,17 @@ public class RegisterAddressMappingTable {
         return jsonObject.containsKey(key);
     }
 
+    public boolean hasAddress(Long num){
+        for(Object k : getRegisterAddressMappingTable().keySet()){
+            if(getRegisterAddressMappingTable().get(k) instanceof Long){
+                if((long)getRegisterAddressMappingTable().get(k) == num){
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void writeKey(String key) {
         long maxAddress = 0;
         for (Object k : getRegisterAddressMappingTable().keySet()) {

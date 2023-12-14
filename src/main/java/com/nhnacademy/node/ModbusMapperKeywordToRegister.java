@@ -1,33 +1,18 @@
 package com.nhnacademy.node;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
 
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.wire.Wire;
 
 public class ModbusMapperKeywordToRegister extends InputOutputNode {
-    public JSONObject registerAddressMappingTable;
+    private RegisterAddressMappingTable registerAddressMappingTable;
 
     protected ModbusMapperKeywordToRegister(String id) {
         super(id, 1);
-        JSONParser jsonParser = new JSONParser();
-        try {
-            Reader reader = new FileReader("src/main/resources/registerAddressMappingTable.json");
-            registerAddressMappingTable = (JSONObject) jsonParser.parse(reader);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        registerAddressMappingTable = new RegisterAddressMappingTable("src/main/resources/registerAddressMappingTable2.json");
     }
 
     @Override
