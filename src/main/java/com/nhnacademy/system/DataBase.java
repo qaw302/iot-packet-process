@@ -11,14 +11,15 @@ public class DataBase {
     private Object[][] data;
     private int colSize;
     private int rowSize;
-    private String defaultKey;
+    private String primaryKey;
+    private Thread autoSaveThread;
 
     public DataBase() {
         super();
         data = new Object[1000][100];
         colSize = 0;
         rowSize = 1;
-        defaultKey = null;
+        primaryKey = null;
     }
 
     public void addCol(String colName) {
@@ -26,28 +27,28 @@ public class DataBase {
         colSize++;
     }
 
-    public void setDefaultKey(String defaultKey) {
-        this.defaultKey = defaultKey;
+    public void setPrimaryKey(String primaryKey) {
+        this.primaryKey = primaryKey;
     }
 
     public void addData(JSONObject jsonObject) {
-        if (!jsonObject.containsKey(defaultKey)) {
-            log.info("defaultKey is not in jsonObject");
+        if (!jsonObject.containsKey(primaryKey)) {
+            log.info("primaryKey is not in jsonObject");
             return;
         }
         int defaultKeyIndex = -1;
         for (int i = 0; i < colSize; i++) {
-            if (data[0][i].equals(defaultKey)) {
+            if (data[0][i].equals(primaryKey)) {
                 defaultKeyIndex = i;
                 break;
             }
         }
         if (defaultKeyIndex == -1) {
-            log.info("defaultKey is not in data");
+            log.info("primaryKey is not in data");
             return;
         }
         for (int i = 0; i < rowSize; i++) {
-            if (data[i][defaultKeyIndex].equals(jsonObject.get(defaultKey))) {
+            if (data[i][defaultKeyIndex].equals(jsonObject.get(primaryKey))) {
                 for (int j = 0; j < colSize; j++) {
                     if (jsonObject.containsKey(data[0][j])) {
                         data[i][j] = jsonObject.get(data[0][j]);
@@ -56,7 +57,7 @@ public class DataBase {
                 return;
             }
             if (i == rowSize - 1) {
-                data[rowSize][defaultKeyIndex] = jsonObject.get(defaultKey);
+                data[rowSize][defaultKeyIndex] = jsonObject.get(primaryKey);
                 for (int j = 0; j < colSize; j++) {
                     if (jsonObject.containsKey(data[0][j])) {
                         data[rowSize][j] = jsonObject.get(data[0][j]);
@@ -68,21 +69,21 @@ public class DataBase {
         }
     }
 
-    public JSONObject getData(String defaultKey) throws NullDataBaseException {
+    public JSONObject getData(String primaryKey) throws NullDataBaseException {
         JSONObject result = new JSONObject();
         int defaultKeyIndex = -1;
         for (int i = 0; i < colSize; i++) {
-            if (data[0][i].equals(this.defaultKey)) {
+            if (data[0][i].equals(this.primaryKey)) {
                 defaultKeyIndex = i;
                 break;
             }
         }
         if (defaultKeyIndex == -1) {
-            log.info("defaultKey is not in data");
-            return null;
+            log.info("primaryKey is not in data");
+            throw new NullDataBaseException();
         }
         for (int i = 1; i < rowSize; i++) {
-            if (data[i][defaultKeyIndex].equals(defaultKey)) {
+            if (data[i][defaultKeyIndex].equals(primaryKey)) {
                 for (int j = 0; j < colSize; j++) {
                     result.put(data[0][j], data[i][j]);
                 }
@@ -101,7 +102,7 @@ public class DataBase {
         dataBase.addCol("sensor");
         dataBase.addCol("address");
         dataBase.addCol("value");
-        dataBase.setDefaultKey("devEui");
+        dataBase.setPrimaryKey("devEui");
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("branch", "gyeongnam");
         jsonObject.put("site", "nhnacademy");
