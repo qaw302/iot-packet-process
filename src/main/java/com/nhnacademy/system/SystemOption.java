@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -134,7 +135,9 @@ public class SystemOption {
                     break;
                 } else if (constructor.getParameterTypes()[0] == String.class
                         && constructor.getParameterTypes()[1] == Broker.class) {
-                    Broker broker = new Broker(node.get("server").toString(), 1883);
+                    log.trace("@@@@");
+                    Broker broker = new Broker(node.get("server").toString(), 502);
+                    log.trace("!!!!!");
                     instance = constructor.newInstance(broker);
                     break;
                 }
@@ -162,34 +165,61 @@ public class SystemOption {
          */
         log.info(nodeList.entrySet().toString());
         log.info(wireInfo.entrySet().toString());
+        int inputNodeIdx = 0;
+        int inputOutputNodeIdx = 0;
+        Wire[] wires;
         for (Map.Entry<String, Object> entry : nodeList.entrySet()) {
             String id = entry.getKey();
             Object node = entry.getValue();
             if (node == null) {
                 continue;
             }
+
             if (node instanceof InputNode) {
                 InputNode inputNode = (InputNode) node;
-                log.info(wireInfo.get(id).size() + "");
-                log.info(((JSONArray) wireInfo.get(id).get(1)).size() + "");
-
-            } else if (node instanceof OutputNode) {
-                OutputNode outputNode = (OutputNode) node;
-                // log.info(wireInfo.get(id).get(0).toString());
-
+                wires = createWires(wireInfo.get(id));
+                connectWires(inputNode, wires, wireInfo.get(id), nodeList, inputNodeIdx);
             } else if (node instanceof InputOutputNode) {
                 InputOutputNode IONode = (InputOutputNode) node;
-                log.info(wireInfo.get(id).get(0).toString());
+                wires = createWires(wireInfo.get(id));
+                connectWires(IONode, wires, wireInfo.get(id), nodeList, inputOutputNodeIdx);
+            }
+        }
+    }
+
+    private void connectWires(Node node, Wire[] wires, JSONArray wireArrayInfo, Map<String, Object> nodeList,
+            int wireIndex) {
+        for (Object wireArray : wireArrayInfo) {
+            for (int i = 0; i < ((JSONArray) wireArray).size(); i++) {
+                if (node instanceof InputNode) {
+                    ((InputNode) node).connectOutputWire(i, wires[wireIndex]);
+                } else if (node instanceof InputOutputNode) {
+                    ((InputOutputNode) node).connectOutputWire(i, wires[wireIndex]);
+                }
+
+                Object targetNode = nodeList.get(((JSONArray) wireArray).get(i).toString());
+                if (targetNode instanceof OutputNode) {
+                    ((OutputNode) targetNode).connectInputWire(wires[wireIndex++]);
+                } else if (targetNode instanceof InputOutputNode) {
+                    ((InputOutputNode) targetNode).connectInputWire(wires[wireIndex++]);
+                }
             }
         }
     }
 
     public Wire[] createWires(JSONArray wireList) {
-        // JSONArray[]
+        Wire[] wires;
+        int wireListSize = 0;
+        for (Object array : wireList) {
+            log.info(array.toString());
+            wireListSize += ((JSONArray) array).size();
+        }
+        wires = new Wire[wireListSize];
 
-        // for (JSONArray array : wireList) {
-
-        // }
+        for (int i = 0; i < wires.length; i++) {
+            wires[i] = new Wire();
+        }
+        return wires;
     }
 
     public static String[] getSensors() {
