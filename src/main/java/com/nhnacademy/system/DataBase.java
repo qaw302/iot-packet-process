@@ -34,15 +34,18 @@ public class DataBase {
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        FileWriter fileWriter = new FileWriter("dataBase.txt");
+                        FileWriter fileWriter = new FileWriter("dataBase.csv");
                         BufferedWriter br = new BufferedWriter(fileWriter);
                         for (int i = 0; i < rowSize; i++) {
                             for (int j = 0; j < colSize; j++) {
-                                br.write(String.format("%-20s", data[i][j]));
+                                br.write(data[i][j].toString());
+                                if (j != colSize - 1)
+                                    br.write(",");
                             }
-                            br.write("\n");
-                            br.flush();
+                            br.write(System.lineSeparator());
                         }
+                        br.flush();
+                        br.close();
                         Thread.sleep(10000);
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
