@@ -43,7 +43,7 @@ public class ModbusMapperKeywordToRegister extends InputOutputNode {
             String sensor = JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "sensor" })
                     .get("sensor")
                     .toString();
-            String key = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
+            String key = branch + "." + site + "." + place + "." + devEui + "." + sensor;
             if (!registerAddressMappingTable.hasKey(key)) {
                 log.info("key not found");
                 continue;

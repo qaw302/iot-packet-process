@@ -45,7 +45,7 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
             }
             JSONObject payload = new JSONObject();
             String key = registerAddressMappingTable.getRegisterAddressMappingTable().get(registerAddress).toString();
-            String[] keys = key.split("/");
+            String[] keys = key.split(".");
             payload.put("branch", keys[0]);
             payload.put("site", keys[1]);
             payload.put("place", keys[2]);

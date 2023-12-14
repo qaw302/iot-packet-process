@@ -48,8 +48,7 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                         new String[] { "payload", "object", sensor });
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
-                String dictionaryKey = branch + "/" + site + "/" + place + "/" + devEui + "/" + sensor;
-                System.out.println(dictionaryKey);
+                String dictionaryKey = branch + "." + site + "." + place + "." + devEui + "." + sensor;
                 if (!registerAddressMappingTable.hasKey(dictionaryKey))
                     registerAddressMappingTable.writeKey(dictionaryKey);
 
