@@ -3,7 +3,7 @@
         "id": "c956f0d458c0b340",
         "type": "mqtt in",
         "topic": "#",
-        "server": "tcp://ems.nhnacademy.com:1883",
+        "server": "ems.nhnacademy.com",
         "wires": [
             [
                 "5ccd1d18d2c7c94d"

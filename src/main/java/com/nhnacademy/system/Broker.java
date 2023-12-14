@@ -6,17 +6,18 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
-
 public class Broker {
     private String id;
     private String host;
     private int port;
+    private static int count;
 
     private IMqttClient client;
     private MqttConnectOptions options = new MqttConnectOptions();
 
     public Broker(String id, String host, int port) {
         super();
+        count++;
         this.id = id;
         this.host = host;
         this.port = port;
@@ -27,6 +28,10 @@ public class Broker {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+
+    public Broker(String host, int port) {
+        this("broker" + (++count), host, port);
     }
 
     void setOption() {
