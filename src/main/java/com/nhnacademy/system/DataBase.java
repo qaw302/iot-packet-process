@@ -1,5 +1,9 @@
 package com.nhnacademy.system;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.json.simple.JSONObject;
 
 import com.nhnacademy.exception.NullDataBaseException;
@@ -20,6 +24,40 @@ public class DataBase {
         colSize = 0;
         rowSize = 1;
         primaryKey = null;
+        autoSave();
+    }
+
+    private void autoSave() {
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        FileWriter fileWriter = new FileWriter("dataBase.txt");
+                        BufferedWriter br = new BufferedWriter(fileWriter);
+                        for (int i = 0; i < rowSize; i++) {
+                            for (int j = 0; j < colSize; j++) {
+                                br.write(String.format("%-20s", data[i][j]));
+                            }
+                            br.write("\n");
+                            br.flush();
+                        }
+                        Thread.sleep(10000);
+                    } catch (IOException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        });
+        autoSaveThread = thread;
+        autoSaveThread.setDaemon(true);
+        autoSaveThread.start();
     }
 
     public void addCol(String colName) {
@@ -93,7 +131,7 @@ public class DataBase {
         throw new NullDataBaseException();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         DataBase dataBase = new DataBase();
         dataBase.addCol("branch");
         dataBase.addCol("site");
@@ -123,7 +161,7 @@ public class DataBase {
         dataBase.addData(jsonObject2);
         System.out.println(dataBase.getData("af87dsaf8sda876"));
         System.out.println(dataBase.getData("bsefs352"));
-
+        Thread.sleep(20000);
     }
 
 }
