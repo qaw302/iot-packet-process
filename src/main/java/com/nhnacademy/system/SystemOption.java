@@ -119,29 +119,31 @@ public class SystemOption {
             Class<?> nodeClass = Class.forName(CLASS_PATH + classNames.get(node.get("type").toString()));
 
             for (Constructor<?> constructor : nodeClass.getConstructors()) {
-                if (constructor.getParameterTypes()[0] == int.class
-                        && constructor.getParameterTypes()[1] == JSONObject.class) {
+                if (constructor.getParameterTypes()[0] == String.class
+                        && constructor.getParameterTypes()[1] == int.class
+                        && constructor.getParameterTypes()[2] == Broker.class) {
                     if (nodeClass.equals(MqttInNode.class)) {
-                        instance = constructor.newInstance(((JSONArray) node.get("wires")).size(), node);
-                    } else if (nodeClass.equals(MqttOutNode.class)) {
-                        instance = constructor.newInstance(((JSONArray) node.get("wires")).size() + 1, node);
+                        Broker broker = new Broker(node.get("server").toString(), 1883);
+                        instance = constructor.newInstance(node.get("topic").toString(), 1, broker);
+                        break;
                     }
-                    break;
-
                 } else if (constructor.getParameterTypes()[0] == int.class
                         && constructor.getParameterTypes()[1] == int.class
                         && constructor.getParameterTypes()[2] == JSONObject.class) {
                     instance = constructor.newInstance(1, ((JSONArray) node.get("wires")).size(), node);
+                    break;
+                } else if (constructor.getParameterTypes()[0] == String.class
+                        && constructor.getParameterTypes()[1] == Broker.class) {
+                    Broker broker = new Broker(node.get("server").toString(), 1883);
+                    instance = constructor.newInstance(broker);
                     break;
                 }
             }
             if (instance == null) {
                 throw new IllegalArgumentException("No suitable constructor found for " + nodeClass.getSimpleName());
             }
-
         } catch (Exception e) {
             log.error("Error creating instance of {}: {}", node.get("type"), e.getMessage());
-            e.printStackTrace();
         }
 
         return instance;
@@ -183,11 +185,11 @@ public class SystemOption {
     }
 
     public Wire[] createWires(JSONArray wireList) {
-        JSONArray[] 
+        // JSONArray[]
 
-        for (JSONArray array : wireList) {
+        // for (JSONArray array : wireList) {
 
-        }
+        // }
     }
 
     public static String[] getSensors() {
