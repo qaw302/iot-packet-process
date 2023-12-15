@@ -1,6 +1,0 @@
-site,sensor,value,branch,place,registerAddress,devEui
-nhnacademy,humidity,59.0,gyeongnam,storage,15,24e124136d151547
-nhnacademy,co2,1093.0,gyeongnam,class_b,13,24e124128c140101
-nhnacademy,co2,865.0,gwangju,classroom,8,24e124126d152590
-nhnacademy,humidity,53.0,gyeongnam,server_room,17,24e124136d151368
-nhnacademy,humidity,61.0,gyeongnam,class_a,19,24e124785c421885
