@@ -32,17 +32,15 @@ public class RuleEngineNode extends InputOutputNode {
 
     @Override
     void process() {
-        for (int i = 0; i < getInputWireCount(); i++) {
-            
-            Wire inputWire = getInputWire(i);
-            if (inputWire == null || !inputWire.hasMessage()){
-                continue;}
+        while (!thread.isInterrupted()) {
+            if (!getMessageQueue().hasMessage())
+                continue;
 
-            Message message = inputWire.get();
-            System.out.println(message);
-            if (!(message instanceof JsonMessage)){
-                continue;}
-            
+            Message message = getMessageQueue().get();
+            if (!(message instanceof JsonMessage)) {
+                log.info("message is not JsonMessage");
+                continue;
+            }
             JsonMessage jsonMessage = (JsonMessage) message;
             JSONObject jsonObject = jsonMessage.getJsonObject();
             JSONObject dataObject = (JSONObject) jsonObject.get("payload");

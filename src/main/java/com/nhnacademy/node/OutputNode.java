@@ -4,10 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.nhnacademy.exception.InvalidArgumentException;
+import com.nhnacademy.system.MessageQueue;
 import com.nhnacademy.wire.Wire;
 
 public abstract class OutputNode extends ActiveNode {
     List<Wire> inputPort;
+    MessageQueue messageQueue = new MessageQueue();
 
     protected OutputNode(String id) {
         super(id);
@@ -25,6 +27,7 @@ public abstract class OutputNode extends ActiveNode {
         }
 
         inputPort.add(wire);
+        messageQueue.addWire(wire);
     }
 
     public int getInputWireCount() {
@@ -41,5 +44,18 @@ public abstract class OutputNode extends ActiveNode {
 
     public List<Wire> getWires() {
         return inputPort;
+    }
+
+    public void disconnectInputWire(Wire wire) {
+        if (wire == null) {
+            throw new InvalidArgumentException();
+        }
+
+        inputPort.remove(wire);
+        messageQueue.removeWire(wire);
+    }
+
+    public MessageQueue getMessageQueue() {
+        return messageQueue;
     }
 }

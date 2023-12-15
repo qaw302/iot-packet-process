@@ -24,11 +24,10 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
     @Override
     void process() {
-        for (int i = 0; i < getInputWireCount(); i++) {
-            Wire wire = getInputWire(i);
-            if (wire == null || !wire.hasMessage())
+        while (!thread.isInterrupted()) {
+            if (!getMessageQueue().hasMessage())
                 continue;
-            Message message = wire.get();
+            Message message = getMessageQueue().get();
             if (!(message instanceof JsonMessage))
                 continue;
             JSONObject jsonObject = ((JsonMessage) message).getJsonObject();

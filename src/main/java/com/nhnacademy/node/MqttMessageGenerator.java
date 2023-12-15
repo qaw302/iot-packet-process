@@ -18,11 +18,10 @@ public class MqttMessageGenerator extends InputOutputNode {
 
     @Override
     void process() {
-        for (int i = 0; i < getInputWireCount(); i++) {
-            Wire inputWire = getInputWire(i);
-            if (inputWire == null || !inputWire.hasMessage())
+        while (!thread.isInterrupted()) {
+            if (!getMessageQueue().hasMessage())
                 continue;
-            Message message = inputWire.get();
+            Message message = getMessageQueue().get();
             if (!(message instanceof JsonMessage))
                 continue;
             JSONObject jsonObject = ((JsonMessage) message).getJsonObject();

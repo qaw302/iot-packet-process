@@ -137,7 +137,6 @@ public class ModbusServerNode extends OutputNode {
         data[9] = b.get(7);
         b.clear();
         b.putLong(Math.round(value));
-        System.out.println("ffffffffffffffff"+Math.round(value));
         data[10] = b.get(6);
         data[11] = b.get(7);
         return data;

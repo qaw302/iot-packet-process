@@ -7,11 +7,13 @@ import com.nhnacademy.exception.AlreadyExistsException;
 import com.nhnacademy.exception.NotExistsException;
 import com.nhnacademy.exception.OutOfBoundsException;
 import com.nhnacademy.message.Message;
+import com.nhnacademy.system.MessageQueue;
 import com.nhnacademy.wire.Wire;
 
 public abstract class InputOutputNode extends ActiveNode {
     List<Wire> inputPort;
     List<Wire>[] outputPort;
+    private MessageQueue messageQueue = new MessageQueue();
 
     protected InputOutputNode(String id, int outCount) {
         super(id);
@@ -91,6 +93,7 @@ public abstract class InputOutputNode extends ActiveNode {
         }
 
         inputPort.add(wire);
+        messageQueue.addWire(wire);
     }
 
     public void disconnectInputWire(Wire wire) {
@@ -103,6 +106,7 @@ public abstract class InputOutputNode extends ActiveNode {
         }
 
         inputPort.remove(wire);
+        messageQueue.removeWire(wire);
     }
 
     public int getInputWireCount() {
@@ -115,6 +119,10 @@ public abstract class InputOutputNode extends ActiveNode {
         }
 
         return inputPort.get(index);
+    }
+
+    public MessageQueue getMessageQueue() {
+        return messageQueue;
     }
 
     void output(int index, Message message) {

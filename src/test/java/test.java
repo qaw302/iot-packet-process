@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class test {
     public static void main(String[] args) throws InterruptedException {
-        Broker broker = new Broker("1","ems.nhnacademy.com", 1883);
+        Broker broker = Broker.getBroker("1","ems.nhnacademy.com", 1883);
         MqttInNode mqttInNode = new MqttInNode("1","application/#", 2, broker);
         MqttMessageProcessingNode mqttMessageProcessingNode = new MqttMessageProcessingNode("2");
         Wire wire = new Wire();
@@ -34,12 +34,11 @@ public class test {
         Wire wire2 = new Wire();
         modbusMasterNode.connectOutputWire(0, wire2);
         modbusMapperRegisterToKeyword.connectInputWire(wire2);
-        Wire wire3 = new Wire();
         MqttMessageGenerator mqttMessageGenerator = new MqttMessageGenerator("6");
         Wire wire4 = new Wire();
         ruleEngineNode.connectOutputWire(0, wire4);
         mqttMessageGenerator.connectInputWire(wire4);
-        Broker broker1 = new Broker("2","localhost", 1883);
+        Broker broker1 = Broker.getBroker("2","localhost", 1883);
         MqttOutNode mqttOutNode = new MqttOutNode("7", broker1);
         Wire wire5 = new Wire();
         mqttMessageGenerator.connectOutputWire(0, wire5);
@@ -53,7 +52,7 @@ public class test {
         modbusMapperKeywordToRegister.connectOutputWire(0, wire7);
         modbusServerNode.connectInputWire(wire7);
         ruleEngineNode.start();
-        modbusMasterNode.start();
+        // modbusMasterNode.start();
         modbusMapperRegisterToKeyword.start();
         mqttMessageGenerator.start();
         mqttOutNode.start();
