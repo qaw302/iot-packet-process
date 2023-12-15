@@ -1,5 +1,8 @@
 package com.nhnacademy.system;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
@@ -11,11 +14,12 @@ public class Broker {
     private String host;
     private int port;
     private static int count;
+    private static Map<String, Broker> brokers = new HashMap<>();
 
     private IMqttClient client;
     private MqttConnectOptions options = new MqttConnectOptions();
 
-    public Broker(String id, String host, int port) {
+    private Broker(String id, String host, int port) {
         super();
         count++;
         this.id = id;
@@ -30,8 +34,16 @@ public class Broker {
         }
     }
 
-    public Broker(String host, int port) {
+    private Broker(String host, int port) {
         this("broker" + (++count), host, port);
+    }
+
+    public static Broker getBroker(String id, String host, int port) {
+        if (!brokers.containsKey(host + ":" + port)) {
+            Broker broker = new Broker(id, host, port);
+            brokers.put(host + ":" + port, broker);
+        }
+        return brokers.get(host + ":" + port);
     }
 
     void setOption() {
@@ -40,7 +52,7 @@ public class Broker {
         options.setKeepAliveInterval(60);
     }
 
-    public String getId(){
+    public String getId() {
         return id;
     }
 

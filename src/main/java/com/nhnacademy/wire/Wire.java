@@ -4,11 +4,9 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import com.nhnacademy.message.Message;
-import com.nhnacademy.node.Node;
 
 public class Wire {
     Queue<Message> messageQueue;
-    Node outNode;
 
     public Wire() {
         super();
@@ -17,21 +15,21 @@ public class Wire {
 
     public synchronized void put(Message message) {
         messageQueue.add(message);
-    }
-
-    public synchronized void unlock() {
         notifyAll();
     }
 
     public synchronized boolean hasMessage() {
+        while (messageQueue.isEmpty()) {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         return !messageQueue.isEmpty();
     }
 
     public Message get() {
         return messageQueue.poll();
     }
-
-    public void setOutNode(Node outNode) {
-        this.outNode = outNode;
-    }   
 }
