@@ -7,6 +7,9 @@ import com.nhnacademy.message.Message;
 import com.nhnacademy.system.DataBase;
 import com.nhnacademy.wire.Wire;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RuleEngineNode extends InputOutputNode {
     private DataBase dataBase;
 
@@ -30,15 +33,16 @@ public class RuleEngineNode extends InputOutputNode {
     @Override
     void process() {
         for (int i = 0; i < getInputWireCount(); i++) {
+            
             Wire inputWire = getInputWire(i);
-
-            if (inputWire == null || !inputWire.hasMessage())
-                continue;
+            if (inputWire == null || !inputWire.hasMessage()){
+                continue;}
 
             Message message = inputWire.get();
-            if (!(message instanceof JsonMessage))
-                continue;
-
+            System.out.println(message);
+            if (!(message instanceof JsonMessage)){
+                continue;}
+            
             JsonMessage jsonMessage = (JsonMessage) message;
             JSONObject jsonObject = jsonMessage.getJsonObject();
             JSONObject dataObject = (JSONObject) jsonObject.get("payload");

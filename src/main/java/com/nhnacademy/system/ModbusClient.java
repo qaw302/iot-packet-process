@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ModbusClient extends Thread {
     private static Queue<JSONObject> dataQueue = new LinkedList<>();
-    static final String HOST = "172.19.0.6";
+    static final String HOST = "192.168.71.87";
     static final int PORT = 502;
     private final int unitId;
     static int transactionId = 0;

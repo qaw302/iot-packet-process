@@ -7,7 +7,7 @@ package com.nhnacademy.node;
 public abstract class ActiveNode extends Node implements Runnable {
     Thread thread;
     boolean running;
-    long interval = 1000;
+    long interval = 2000;
 
     ActiveNode() {
         super();

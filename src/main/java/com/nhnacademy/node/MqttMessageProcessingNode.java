@@ -65,7 +65,6 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
                 JSONObject result = new JSONObject();
                 result.put("payload", payload);
-
                 output(0, new JsonMessage(result));
             }
 

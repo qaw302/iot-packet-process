@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ModbusMasterNode extends InputNode {
-    private static final int ADDRESS = 11101;
+    private static final int ADDRESS = 1;
     private ModbusClient modbusClient;
     private Queue<JSONObject> dataQueue;
 

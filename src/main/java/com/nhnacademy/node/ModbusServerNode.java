@@ -13,6 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.json.simple.JSONObject;
+
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.system.ModbusFunctionCode;
@@ -49,6 +51,38 @@ public class ModbusServerNode extends OutputNode {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             headerMap = new HashMap<>();
             log.trace("port : " + port + " modbus server started");
+
+            Thread thread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        selector.select();
+                        Set<SelectionKey> selectedKeys = selector.selectedKeys();
+                        Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+                        while (keyIterator.hasNext()) {
+                            SelectionKey key = keyIterator.next();
+
+                            if (key.isAcceptable()) {
+                                ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
+                                SocketChannel clientChannel = serverChannel.accept();
+                                clientChannel.configureBlocking(false);
+                                parseData(key, clientChannel);
+                                clientChannel.register(selector, SelectionKey.OP_READ);
+
+                            } else if (key.isReadable()) {
+                                SocketChannel clientChannel = (SocketChannel) key.channel();
+                                parseData(key, clientChannel);
+                            }
+                            keyIterator.remove();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            thread.setDaemon(true);
+            thread.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -58,27 +92,9 @@ public class ModbusServerNode extends OutputNode {
     @Override
     public void process() {
         try {
-            inputWireToSocket();
-            selector.select();
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-            Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+                                        inputWireToSocket();
 
-            while (keyIterator.hasNext()) {
-                SelectionKey key = keyIterator.next();
 
-                if (key.isAcceptable()) {
-                    ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
-                    SocketChannel clientChannel = serverChannel.accept();
-                    clientChannel.configureBlocking(false);
-                    parseData(key, clientChannel);
-                    clientChannel.register(selector, SelectionKey.OP_READ);
-
-                } else if (key.isReadable()) {
-                    SocketChannel clientChannel = (SocketChannel) key.channel();
-                    parseData(key, clientChannel);
-                }
-                keyIterator.remove();
-            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -111,18 +127,19 @@ public class ModbusServerNode extends OutputNode {
     }
 
     private byte[] jsonMessageToByte(JsonMessage message) {
-        int address = (int) message.getJsonObject().get("address");
-        int value = (int) message.getJsonObject().get("value");
+        long address = (long) ((JSONObject) message.getJsonObject().get("payload")).get("registerAddress");
+        double value = (double) ((JSONObject) message.getJsonObject().get("payload")).get("value");
         byte[] data = new byte[] { 0, 0, 0, 0, 0, 6, 1, 6, 0, 0, 0, 0 };
-        ByteBuffer b = ByteBuffer.allocate(4).order(ByteOrder.BIG_ENDIAN);
+        ByteBuffer b = ByteBuffer.allocate(8).order(ByteOrder.BIG_ENDIAN);
         b.clear();
-        b.putInt(address);
-        data[8] = b.get(3);
-        data[9] = b.get(4);
+        b.putLong(address);
+        data[8] = b.get(6);
+        data[9] = b.get(7);
         b.clear();
-        b.putInt(value);
-        data[10] = b.get(3);
-        data[11] = b.get(4);
+        b.putLong(Math.round(value));
+        System.out.println("ffffffffffffffff"+Math.round(value));
+        data[10] = b.get(6);
+        data[11] = b.get(7);
         return data;
     }
 

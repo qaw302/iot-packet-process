@@ -55,7 +55,7 @@ public class ModbusMapperKeywordToRegister extends InputOutputNode {
             payload.put("value", JsonMessage.getDestJsonObject(jsonObject, new String[] { "payload", "value" })
                     .get("value"));
             result.put("payload", payload);
-            
+        System.out.println("send");
             output(0, new JsonMessage(result));
         }
     }

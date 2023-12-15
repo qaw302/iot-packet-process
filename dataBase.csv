@@ -1,3 +1,2 @@
-branch,site,place,devEui,sensor,address,value
-gyeongnam,nhnacademy,class_a,af87dsaf8sda876,temperature,11101,25.5
-gyeongnam,nhnacademy,class_b,bsefs352,co2,11203,500
+site,sensor,value,branch,place,registerAddress,devEui
+nhnacademy,humidity,51.5,gyeongnam,server_room,17,24e124136d151368

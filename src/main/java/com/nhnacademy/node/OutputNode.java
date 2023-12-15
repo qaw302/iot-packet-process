@@ -38,4 +38,8 @@ public abstract class OutputNode extends ActiveNode {
 
         return inputPort.get(index);
     }
+
+    public List<Wire> getWires() {
+        return inputPort;
+    }
 }
