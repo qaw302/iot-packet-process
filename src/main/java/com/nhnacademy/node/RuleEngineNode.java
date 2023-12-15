@@ -15,7 +15,7 @@ public class RuleEngineNode extends InputOutputNode {
 
     public RuleEngineNode(String id) {
         super(id, 1);
-        dataBase = new DataBase();
+        dataBase = DataBase.getDataBase("src/main/resources/dataBase.csv");
         dataBase.addCol("site");
         dataBase.addCol("sensor");
         dataBase.addCol("value");

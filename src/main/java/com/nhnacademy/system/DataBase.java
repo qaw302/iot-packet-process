@@ -1,8 +1,15 @@
 package com.nhnacademy.system;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.json.simple.JSONObject;
 
@@ -17,14 +24,49 @@ public class DataBase {
     private int rowSize;
     private String primaryKey;
     private Thread autoSaveThread;
+    private static Map<String, DataBase> dataBaseMap = new HashMap<>();
+    private String name;
 
-    public DataBase() {
+    private DataBase(String name) {
         super();
-        data = new Object[1000][100];
-        colSize = 0;
-        rowSize = 1;
-        primaryKey = null;
+        File file = new File(name);
+        if (file.exists()) {
+            readFile(file);
+        } else {
+            data = new Object[1000][100];
+            this.name = name;
+            colSize = 0;
+            rowSize = 1;
+            primaryKey = null;
+        }
+
         autoSave();
+    }
+
+    private void readFile(File file) {
+        try {
+            data = new Object[1000][100];
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line = null;
+            try {
+                while ((line = br.readLine()) != null) {
+                    if (line.length() == 0)
+                        continue;
+                    String[] split = line.split(",");
+                    for (int i = 0; i < split.length; i++) {
+                        data[rowSize][i] = split[i];
+                    }
+                    rowSize++;
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     private void autoSave() {
@@ -34,7 +76,7 @@ public class DataBase {
             public void run() {
                 while (!Thread.currentThread().isInterrupted()) {
                     try {
-                        FileWriter fileWriter = new FileWriter("dataBase.csv");
+                        FileWriter fileWriter = new FileWriter(name);
                         BufferedWriter br = new BufferedWriter(fileWriter);
                         for (int i = 0; i < rowSize; i++) {
                             for (int j = 0; j < colSize; j++) {
@@ -46,6 +88,7 @@ public class DataBase {
                         }
                         br.flush();
                         br.close();
+                        readFile(new File(name));
                         Thread.sleep(10000);
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -61,6 +104,14 @@ public class DataBase {
         autoSaveThread = thread;
         autoSaveThread.setDaemon(true);
         autoSaveThread.start();
+    }
+
+    public static DataBase getDataBase(String name) {
+        if (!dataBaseMap.containsKey(name)) {
+            DataBase dataBase = new DataBase(name);
+            dataBaseMap.put(name, dataBase);
+        }
+        return dataBaseMap.get(name);
     }
 
     public void addCol(String colName) {
@@ -95,6 +146,7 @@ public class DataBase {
                         data[i][j] = jsonObject.get(data[0][j]);
                     }
                 }
+                readFile(new File(name));
                 return;
             }
             if (i == rowSize - 1) {
@@ -105,6 +157,7 @@ public class DataBase {
                     }
                 }
                 rowSize++;
+                readFile(new File(name));
                 return;
             }
         }
@@ -133,38 +186,4 @@ public class DataBase {
         }
         throw new NullDataBaseException();
     }
-
-    public static void main(String[] args) throws InterruptedException {
-        DataBase dataBase = new DataBase();
-        dataBase.addCol("branch");
-        dataBase.addCol("site");
-        dataBase.addCol("place");
-        dataBase.addCol("devEui");
-        dataBase.addCol("sensor");
-        dataBase.addCol("address");
-        dataBase.addCol("value");
-        dataBase.setPrimaryKey("devEui");
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("branch", "gyeongnam");
-        jsonObject.put("site", "nhnacademy");
-        jsonObject.put("place", "class_a");
-        jsonObject.put("devEui", "af87dsaf8sda876");
-        jsonObject.put("sensor", "temperature");
-        jsonObject.put("address", "11101");
-        jsonObject.put("value", 25.5);
-        dataBase.addData(jsonObject);
-        JSONObject jsonObject2 = new JSONObject();
-        jsonObject2.put("branch", "gyeongnam");
-        jsonObject2.put("site", "nhnacademy");
-        jsonObject2.put("place", "class_b");
-        jsonObject2.put("devEui", "bsefs352");
-        jsonObject2.put("sensor", "co2");
-        jsonObject2.put("address", "11203");
-        jsonObject2.put("value", 500);
-        dataBase.addData(jsonObject2);
-        System.out.println(dataBase.getData("af87dsaf8sda876"));
-        System.out.println(dataBase.getData("bsefs352"));
-        Thread.sleep(20000);
-    }
-
 }
