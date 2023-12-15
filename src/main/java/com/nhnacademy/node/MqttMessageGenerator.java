@@ -4,7 +4,6 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
-import com.nhnacademy.wire.Wire;
 
 public class MqttMessageGenerator extends InputOutputNode {
 

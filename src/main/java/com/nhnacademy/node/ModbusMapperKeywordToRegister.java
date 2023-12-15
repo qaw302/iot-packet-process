@@ -4,7 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
-import com.nhnacademy.wire.Wire;
+import com.nhnacademy.system.RegisterAddressMappingTable;
 
 import lombok.extern.slf4j.Slf4j;
 

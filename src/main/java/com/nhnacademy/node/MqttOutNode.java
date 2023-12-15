@@ -6,7 +6,6 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.system.Broker;
-import com.nhnacademy.wire.Wire;
 
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,4 +1,4 @@
-package com.nhnacademy.node;
+package com.nhnacademy.system;
 
 import java.io.File;
 import java.io.FileReader;
@@ -12,23 +12,52 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class RegisterAddressMappingTable {
     private JSONObject jsonObject;
     private String path;
     private static Map<String, RegisterAddressMappingTable> registerAddressMappingTableMap = new HashMap<>();
 
-    private RegisterAddressMappingTable() {
+    private RegisterAddressMappingTable(String path) {
         super();
+        this.path = path;
+        readFile();
+        autoSave();
     }
 
     public static RegisterAddressMappingTable getRegisterAddressMappingTable(String path) {
         if (!registerAddressMappingTableMap.containsKey(path)) {
-            RegisterAddressMappingTable registerAddressMappingTable = new RegisterAddressMappingTable();
-            registerAddressMappingTable.path = path;
-            registerAddressMappingTable.readFile();
+            RegisterAddressMappingTable registerAddressMappingTable = new RegisterAddressMappingTable(path);
             registerAddressMappingTableMap.put(path, registerAddressMappingTable);
         }
         return registerAddressMappingTableMap.get(path);
+    }
+
+    private void autoSave() {
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                while (!Thread.currentThread().isInterrupted()) {
+                    try {
+                        FileWriter file = new FileWriter(path);
+                        file.write(getRegisterAddressMappingTable().toJSONString());
+                        file.flush();
+                        file.close();
+                        Thread.sleep(10000);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void readFile() {
@@ -40,10 +69,14 @@ public class RegisterAddressMappingTable {
                 jsonObject = (JSONObject) jsonParser.parse(reader);
                 reader.close();
             } catch (IOException e) {
-                // TODO Auto-generated catch block
+                log.info("file read error");
+                log.info("create new json file");
+                jsonObject = new JSONObject();
                 e.printStackTrace();
             } catch (ParseException e) {
-                e.printStackTrace();
+                jsonObject = new JSONObject();
+                log.info("json format error");
+                log.info("create new json file");
             }
         } else {
             jsonObject = new JSONObject();
@@ -81,14 +114,5 @@ public class RegisterAddressMappingTable {
         maxAddress++;
 
         getRegisterAddressMappingTable().put(key, maxAddress);
-        try {
-            FileWriter file = new FileWriter(path);
-            file.write(getRegisterAddressMappingTable().toJSONString());
-            file.flush();
-            file.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        readFile();
     }
 }

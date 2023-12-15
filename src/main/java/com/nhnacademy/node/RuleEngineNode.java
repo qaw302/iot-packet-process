@@ -5,7 +5,6 @@ import org.json.simple.JSONObject;
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.system.DataBase;
-import com.nhnacademy.wire.Wire;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,14 +15,9 @@ public class RuleEngineNode extends InputOutputNode {
     public RuleEngineNode(String id) {
         super(id, 1);
         dataBase = DataBase.getDataBase("src/main/resources/dataBase.csv");
-        dataBase.addCol("site");
-        dataBase.addCol("sensor");
-        dataBase.addCol("value");
-        dataBase.addCol("branch");
-        dataBase.addCol("place");
-        dataBase.addCol("registerAddress");
-        dataBase.addCol("devEui");
-        dataBase.setPrimaryKey("devEui");
+        String[] colNames = { "site", "sensor", "value", "branch", "place", "registerAddress", "devEui" };
+        dataBase.addCol(colNames);
+        dataBase.setPrimaryKey("registerAddress");
     }
 
     @Override

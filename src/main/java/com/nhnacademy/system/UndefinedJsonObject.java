@@ -1,7 +1,5 @@
 package com.nhnacademy.system;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.json.simple.JSONObject;
 
 public class UndefinedJsonObject<V, K> extends JSONObject {

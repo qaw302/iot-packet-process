@@ -22,22 +22,21 @@ public class DataBase {
     private Object[][] data;
     private int colSize;
     private int rowSize;
-    private String primaryKey;
+    private Object primaryKey;
     private Thread autoSaveThread;
     private static Map<String, DataBase> dataBaseMap = new HashMap<>();
     private String name;
 
     private DataBase(String name) {
         super();
+        this.name = name;
         File file = new File(name);
         if (file.exists()) {
             readFile(file);
         } else {
             data = new Object[1000][100];
-            this.name = name;
             colSize = 0;
             rowSize = 1;
-            primaryKey = null;
         }
 
         autoSave();
@@ -51,7 +50,7 @@ public class DataBase {
             try {
                 while ((line = br.readLine()) != null) {
                     if (line.length() == 0)
-                        continue;
+                        break;
                     String[] split = line.split(",");
                     for (int i = 0; i < split.length; i++) {
                         data[rowSize][i] = split[i];
@@ -88,7 +87,6 @@ public class DataBase {
                         }
                         br.flush();
                         br.close();
-                        readFile(new File(name));
                         Thread.sleep(10000);
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
@@ -114,12 +112,31 @@ public class DataBase {
         return dataBaseMap.get(name);
     }
 
-    public void addCol(String colName) {
-        data[0][colSize] = colName;
-        colSize++;
+    public void addCol(String[] colNames) {
+        for (int i = 0; i < colNames.length; i++) {
+            Boolean isExist = false;
+            for (int j = 0; j < colSize; j++) {
+                if (data[0][j].equals(colNames[i])) {
+                    isExist = true;
+                    break;
+                }
+            }
+            if (!isExist) {
+                data[0][colSize] = colNames[i];
+                colSize++;
+            }
+        }
     }
 
-    public void setPrimaryKey(String primaryKey) {
+    public String[] getCols() {
+        String[] result = new String[colSize];
+        for (int i = 0; i < colSize; i++) {
+            result[i] = data[0][i].toString();
+        }
+        return result;
+    }
+
+    public void setPrimaryKey(Object primaryKey) {
         this.primaryKey = primaryKey;
     }
 
@@ -146,7 +163,6 @@ public class DataBase {
                         data[i][j] = jsonObject.get(data[0][j]);
                     }
                 }
-                readFile(new File(name));
                 return;
             }
             if (i == rowSize - 1) {
@@ -157,7 +173,6 @@ public class DataBase {
                     }
                 }
                 rowSize++;
-                readFile(new File(name));
                 return;
             }
         }

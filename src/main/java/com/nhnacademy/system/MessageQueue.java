@@ -37,7 +37,7 @@ public class MessageQueue {
         notifyAll();
     }
 
-    public Message get() {
+    public synchronized Message get() {
         return queue.poll();
     }
 

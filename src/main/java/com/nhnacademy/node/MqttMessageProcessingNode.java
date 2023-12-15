@@ -4,8 +4,8 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
+import com.nhnacademy.system.RegisterAddressMappingTable;
 import com.nhnacademy.system.UndefinedJsonObject;
-import com.nhnacademy.wire.Wire;
 
 public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;

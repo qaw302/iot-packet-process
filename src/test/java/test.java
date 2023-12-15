@@ -55,7 +55,7 @@ public class test {
         // modbusMasterNode.start();
         modbusMapperRegisterToKeyword.start();
         mqttMessageGenerator.start();
-        mqttOutNode.start();
+        // mqttOutNode.start();
         modbusMapperKeywordToRegister.start();
         modbusServerNode.start();
         // while(true){
