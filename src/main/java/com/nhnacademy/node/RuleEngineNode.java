@@ -13,7 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RuleEngineNode extends InputOutputNode {
     private DataBase dataBase;
 
-    protected RuleEngineNode(String id) {
+    public RuleEngineNode(String id) {
         super(id, 1);
         dataBase = new DataBase();
         dataBase.addCol("site");

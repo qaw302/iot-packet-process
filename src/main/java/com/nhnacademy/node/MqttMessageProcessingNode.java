@@ -11,7 +11,7 @@ public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;
     RegisterAddressMappingTable registerAddressMappingTable;
 
-    protected MqttMessageProcessingNode(String id) {
+    public MqttMessageProcessingNode(String id) {
         super(id, 1);
         sensors = new String[] { "temperature", "humidity", "co2" };
         registerAddressMappingTable = RegisterAddressMappingTable

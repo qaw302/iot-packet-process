@@ -8,7 +8,7 @@ import com.nhnacademy.wire.Wire;
 
 public class MqttMessageGenerator extends InputOutputNode {
 
-    protected MqttMessageGenerator(String id) {
+    public MqttMessageGenerator(String id) {
         super(id, 1);
     }
 

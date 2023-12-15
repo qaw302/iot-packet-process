@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ModbusMapperKeywordToRegister extends InputOutputNode {
     private RegisterAddressMappingTable registerAddressMappingTable;
 
-    protected ModbusMapperKeywordToRegister(String id) {
+    public ModbusMapperKeywordToRegister(String id) {
         super(id, 1);
         registerAddressMappingTable = RegisterAddressMappingTable
                 .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
