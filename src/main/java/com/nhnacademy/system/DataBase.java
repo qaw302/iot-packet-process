@@ -157,10 +157,10 @@ public class DataBase {
             return;
         }
         for (int i = 0; i < rowSize; i++) {
-            if (data[i][defaultKeyIndex].equals(jsonObject.get(primaryKey))) {
+            if (data[i][defaultKeyIndex].equals(jsonObject.get(primaryKey).toString())) {
                 for (int j = 0; j < colSize; j++) {
                     if (jsonObject.containsKey(data[0][j])) {
-                        data[i][j] = jsonObject.get(data[0][j]);
+                        data[i][j] = jsonObject.get(data[0][j]).toString();
                     }
                 }
                 return;
@@ -169,7 +169,7 @@ public class DataBase {
                 data[rowSize][defaultKeyIndex] = jsonObject.get(primaryKey);
                 for (int j = 0; j < colSize; j++) {
                     if (jsonObject.containsKey(data[0][j])) {
-                        data[rowSize][j] = jsonObject.get(data[0][j]);
+                        data[rowSize][j] = jsonObject.get(data[0][j]).toString();
                     }
                 }
                 rowSize++;
@@ -178,7 +178,7 @@ public class DataBase {
         }
     }
 
-    public JSONObject getData(String primaryKey) throws NullDataBaseException {
+    public JSONObject getData(Object primaryKey) throws NullDataBaseException {
         JSONObject result = new JSONObject();
         int defaultKeyIndex = -1;
         for (int i = 0; i < colSize; i++) {
@@ -192,7 +192,7 @@ public class DataBase {
             throw new NullDataBaseException();
         }
         for (int i = 1; i < rowSize; i++) {
-            if (data[i][defaultKeyIndex].equals(primaryKey)) {
+            if (data[i][defaultKeyIndex].equals(primaryKey.toString())) {
                 for (int j = 0; j < colSize; j++) {
                     result.put(data[0][j], data[i][j]);
                 }

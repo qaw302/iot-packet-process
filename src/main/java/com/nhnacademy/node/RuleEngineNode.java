@@ -31,10 +31,9 @@ public class RuleEngineNode extends InputOutputNode {
                 continue;
 
             Message message = getMessageQueue().get();
-            if (!(message instanceof JsonMessage)) {
-                log.info("message is not JsonMessage");
+            if (message == null)
                 continue;
-            }
+
             JsonMessage jsonMessage = (JsonMessage) message;
             JSONObject jsonObject = jsonMessage.getJsonObject();
             JSONObject dataObject = (JSONObject) jsonObject.get("payload");
