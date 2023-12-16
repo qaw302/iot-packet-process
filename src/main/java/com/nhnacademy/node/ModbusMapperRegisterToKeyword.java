@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
+import com.nhnacademy.system.OutputLogger;
 import com.nhnacademy.system.RegisterAddressMappingTable;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,8 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
         while (!thread.isInterrupted()) {
             if (!getMessageQueue().hasMessage())
                 continue;
+            Long startTime = System.currentTimeMillis();
+            int error = 0;
             Message message = getMessageQueue().get();
             if (!(message instanceof JsonMessage))
                 continue;
@@ -53,8 +56,11 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
             payload.put("address", registerAddress);
             JSONObject result = new JSONObject();
             result.put("payload", payload);
-
             output(0, new JsonMessage(result));
+
+            OutputLogger.getInstance().write(getId(), jsonObject.toString().length(), result.toString().length(), error,
+                    startTime,
+                    System.currentTimeMillis() - startTime);
         }
     }
 

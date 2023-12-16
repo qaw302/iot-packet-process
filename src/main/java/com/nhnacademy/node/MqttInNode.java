@@ -8,6 +8,7 @@ import org.json.simple.parser.JSONParser;
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.system.Broker;
+import com.nhnacademy.system.OutputLogger;
 import com.nhnacademy.wire.Wire;
 
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,8 @@ public class MqttInNode extends InputNode {
             broker.getClient().subscribe(topic, qos, (clientTopic, clientMsg) -> {
                 JSONParser parser = new JSONParser();
                 JSONObject jsonObject = new JSONObject();
+                Long startTime = System.currentTimeMillis();
+                int error = 0;
                 jsonObject.put("topic", clientTopic);
                 Object payload = parser.parse(new String(clientMsg.getPayload(), "UTF-8"));
                 // payload == jsonobject
@@ -57,6 +60,10 @@ public class MqttInNode extends InputNode {
                     return;
                 jsonObject.put("payload", (JSONObject) payload);
                 output(new JsonMessage(jsonObject));
+
+                OutputLogger.getInstance().write(getId(), jsonObject.toString().length(),
+                        jsonObject.toString().length(), error, startTime,
+                        System.currentTimeMillis() - startTime);
 
             });
         } catch (Exception e) {

@@ -4,16 +4,19 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 
 public class OutputLogger {
     private static OutputLogger instance = new OutputLogger();
-    private static String path = "src/main/resources/";
+    private static final String path = "src/main/resources/";
+    SimpleDateFormat simpleDateFormatStartTime = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss");
+    SimpleDateFormat simpleDateFormatRunningTime = new SimpleDateFormat("HH:mm:ss");
     File file;
     String transferLogs = "";
 
     private OutputLogger() {
         super();
-        file = new File(path + "transferInfo" + System.currentTimeMillis() + ".txt");
+        file = new File(path + "transferInfo" + simpleDateFormatStartTime.format(System.currentTimeMillis()) + ".csv");
         transferLogs += "id,수신,송신,에러,시작 시간,동작 시간\n";
         autoSave();
     }
@@ -46,9 +49,14 @@ public class OutputLogger {
         thread.start();
     }
 
-    public void write(String id, String receive, String send, String error, String startTime,
-            String runningTime) {
-        transferLogs += id + "," + receive + "," + send + "," + error + "," + startTime + "," + runningTime
+    public synchronized void write(String id, int receive, int send, int error, Long startTime,
+            Long runningTime) {
+                long second = runningTime / 1000;
+                long minute = second / 60;
+                long hour = minute / 60;
+                String time = String.format("%02d:%02d:%02d.%04d", hour, minute % 60, second % 60, runningTime % 1000);
+        transferLogs += id + "," + receive + "," + send + "," + error + ","
+                + simpleDateFormatStartTime.format(startTime) + "," + time
                 + "\n";
     }
 

@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
+import com.nhnacademy.system.OutputLogger;
 import com.nhnacademy.system.RegisterAddressMappingTable;
 import com.nhnacademy.system.UndefinedJsonObject;
 
@@ -27,6 +28,8 @@ public class MqttMessageProcessingNode extends InputOutputNode {
         while (!thread.isInterrupted()) {
             if (!getMessageQueue().hasMessage())
                 continue;
+            Long startTime = System.currentTimeMillis();
+            int error = 0;
             Message message = getMessageQueue().get();
             if (!(message instanceof JsonMessage))
                 continue;
@@ -63,8 +66,11 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                 payload.put("value", value);
 
                 JSONObject result = new JSONObject();
-                result.put("payload", payload);
                 output(0, new JsonMessage(result));
+
+                result.put("payload", payload);
+                OutputLogger.getInstance().write(getId(), jsonObject.toString().length(), result.toString().length(),
+                        error, startTime, System.currentTimeMillis() - startTime);
             }
 
         }

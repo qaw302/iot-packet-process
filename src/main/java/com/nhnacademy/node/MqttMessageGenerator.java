@@ -4,6 +4,7 @@ import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
+import com.nhnacademy.system.OutputLogger;
 
 public class MqttMessageGenerator extends InputOutputNode {
 
@@ -20,6 +21,8 @@ public class MqttMessageGenerator extends InputOutputNode {
         while (!thread.isInterrupted()) {
             if (!getMessageQueue().hasMessage())
                 continue;
+            Long startTime = System.currentTimeMillis();
+            int error = 0;
             Message message = getMessageQueue().get();
             if (!(message instanceof JsonMessage))
                 continue;
@@ -30,10 +33,14 @@ public class MqttMessageGenerator extends InputOutputNode {
             payload = new JSONObject();
             payload.put("value", jsonObject.get("value"));
             payload.put("time", System.currentTimeMillis());
-            jsonObject = new JSONObject();
-            jsonObject.put("topic", topic);
-            jsonObject.put("payload", payload);
-            output(0, new JsonMessage(jsonObject));
+            JSONObject result = new JSONObject();
+            result.put("topic", topic);
+            result.put("payload", payload);
+            output(0, new JsonMessage(result));
+
+            OutputLogger.getInstance().write(getId(), jsonObject.toString().length(), result.toString().length(), error,
+                    startTime,
+                    System.currentTimeMillis() - startTime);
         }
     }
 
