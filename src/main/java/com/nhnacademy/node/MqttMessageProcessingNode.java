@@ -12,8 +12,15 @@ public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;
     RegisterAddressMappingTable registerAddressMappingTable;
 
-    public MqttMessageProcessingNode(String id) {
-        super(id, 1);
+    // public MqttMessageProcessingNode(String id) {
+    //     super(id, 1);
+    //     sensors = new String[] { "temperature", "humidity", "co2" };
+    //     registerAddressMappingTable = RegisterAddressMappingTable
+    //             .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
+    // }
+
+    public MqttMessageProcessingNode() {
+        super(1);
         sensors = new String[] { "temperature", "humidity", "co2" };
         registerAddressMappingTable = RegisterAddressMappingTable
                 .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
@@ -78,10 +85,6 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
     @Override
     void postprocess() {
-    }
-
-    public static void main(String[] args) {
-        MqttMessageProcessingNode mqttMessageProcessingNode = new MqttMessageProcessingNode("test");
     }
 
 }

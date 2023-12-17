@@ -24,18 +24,27 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class ModbusServerNode extends OutputNode {
+    private static final int DEFAULT_PORT = 1234;
     private static final String TRANSACTION_ID = "transactionId";
     private static final String PROTOCOL_ID = "protocolId";
     private static final String LENGTH = "length";
     private static final byte UNIT_ID = 1; // slave 장치의 ID , 즉 서버의 아이디
     private static byte[] tempDB = new byte[40000];
-    private int port;
+    private int port = DEFAULT_PORT;
     private HashMap<String, byte[]> headerMap;
     private Selector selector;
     private ServerSocketChannel serverSocketChannel;
 
-    public ModbusServerNode(int port) {
+    public ModbusServerNode() {
         super();
+    }
+
+    public ModbusServerNode(String id) {
+        super(id);
+    }
+
+    public ModbusServerNode(String id, int port) {
+        super(id);
         this.port = port;
     }
 
@@ -92,8 +101,7 @@ public class ModbusServerNode extends OutputNode {
     @Override
     public void process() {
         try {
-                                        inputWireToSocket();
-
+            inputWireToSocket();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -333,11 +341,6 @@ public class ModbusServerNode extends OutputNode {
         b.clear();
         b.putInt(length);
         headerMap.put(LENGTH, new byte[] { b.get(2), b.get(3) });
-    }
-
-    public static void main(String[] args) {
-        ModbusServerNode server = new ModbusServerNode(11502);
-        server.start();
     }
 
 }

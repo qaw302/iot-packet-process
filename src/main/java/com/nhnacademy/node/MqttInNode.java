@@ -19,15 +19,16 @@ public class MqttInNode extends InputNode {
     private int qos;
     private Broker broker;
 
-    public MqttInNode(String id, String topic, int qos, Broker broker) {
-        super(id, 1);
-        this.topic = topic;
-        this.qos = qos;
-        this.broker = broker;
-    }
+    // public MqttInNode(String id, String topic, int qos, Broker broker, int
+    // outCount) {
+    // super(id, outCount);
+    // this.topic = topic;
+    // this.qos = qos;
+    // this.broker = broker;
+    // }
 
-    public MqttInNode(String topic, int qos, Broker broker) {
-        super(1);
+    public MqttInNode(String topic, int qos, Broker broker, int outCount) {
+        super(outCount);
         this.topic = topic;
         this.qos = qos;
         this.broker = broker;
@@ -60,7 +61,7 @@ public class MqttInNode extends InputNode {
                     return;
                 jsonObject.put("payload", (JSONObject) payload);
                 output(new JsonMessage(jsonObject));
-
+                log.trace("mqtt in processing");
                 OutputLogger.getInstance().write(getId(), jsonObject.toString().length(),
                         jsonObject.toString().length(), error, startTime,
                         System.currentTimeMillis() - startTime);

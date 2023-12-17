@@ -9,6 +9,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class Broker {
     private String id;
     private String host;
@@ -41,6 +44,14 @@ public class Broker {
     public static Broker getBroker(String id, String host, int port) {
         if (!brokers.containsKey(host + ":" + port)) {
             Broker broker = new Broker(id, host, port);
+            brokers.put(host + ":" + port, broker);
+        }
+        return brokers.get(host + ":" + port);
+    }
+
+    public static Broker getBroker(String host, int port) {
+        if (!brokers.containsKey(host + ":" + port)) {
+            Broker broker = new Broker(host, port);
             brokers.put(host + ":" + port, broker);
         }
         return brokers.get(host + ":" + port);

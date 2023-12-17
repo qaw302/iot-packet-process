@@ -21,6 +21,14 @@ public class RuleEngineNode extends InputOutputNode {
         dataBase.setPrimaryKey("registerAddress");
     }
 
+    public RuleEngineNode() {
+        super(1);
+        dataBase = DataBase.getDataBase("src/main/resources/dataBase.csv");
+        String[] colNames = { "site", "sensor", "value", "branch", "place", "registerAddress", "devEui" };
+        dataBase.addCol(colNames);
+        dataBase.setPrimaryKey("registerAddress");
+    }
+
     @Override
     void preprocess() {
     }

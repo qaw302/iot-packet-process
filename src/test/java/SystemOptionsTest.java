@@ -5,5 +5,6 @@ public class SystemOptionsTest {
         SystemOption a = new SystemOption(args);
         a.createNodes();
         a.createFlow();
+        a.startFlow();
     }
 }

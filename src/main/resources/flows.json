@@ -7,11 +7,40 @@
         "wires": [
             [
                 "5ccd1d18d2c7c94d"
-            ],
-            [
-                "asdfasdfasdfasdf",
-                "asdfasdfasdfffas"
             ]
         ]
+    },
+    {
+        "id": "5ccd1d18d2c7c94d",
+        "type": "mqtt preprocess",
+        "wires": [
+            [
+                "5ccd1d18d2c7c94a"
+            ]
+        ]
+    },
+    {
+        "id": "5ccd1d18d2c7c94a",
+        "type": "rule engine",
+        "wires": [
+            [
+                "5ccd1d18d2c7c94b"
+            ]
+        ]
+    },
+    {
+        "id": "5ccd1d18d2c7c94b",
+        "type": "modbus keyword to register",
+        "wires": [
+            [
+                "5ccd1d18d2c7c94c"
+            ]
+        ]
+    },
+    {
+        "id": "5ccd1d18d2c7c94c",
+        "type": "modbus server",
+        "server": "localhost",
+        "wires": []
     }
 ]

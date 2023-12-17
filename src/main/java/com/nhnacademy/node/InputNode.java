@@ -48,10 +48,6 @@ public abstract class InputNode extends ActiveNode {
             throw new InvalidArgumentException("Wire is null");
         }
 
-        if (outputPort[index].contains(wire)) {
-            throw new AlreadyExistsException("Wire is already connected");
-        }
-
         outputPort[index].add(wire);
     }
 

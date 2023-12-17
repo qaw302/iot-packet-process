@@ -19,6 +19,12 @@ public class ModbusMapperRegisterToKeyword extends InputOutputNode {
                 .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
     }
 
+    public ModbusMapperRegisterToKeyword() {
+        super(1);
+        registerAddressMappingTable = RegisterAddressMappingTable
+                .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
+    }
+
     @Override
     void preprocess() {
     }

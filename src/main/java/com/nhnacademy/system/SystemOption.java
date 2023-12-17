@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,8 +16,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
+import com.nhnacademy.node.ActiveNode;
 import com.nhnacademy.node.InputNode;
 import com.nhnacademy.node.InputOutputNode;
+import com.nhnacademy.node.ModbusServerNode;
 import com.nhnacademy.node.MqttInNode;
 import com.nhnacademy.node.MqttOutNode;
 import com.nhnacademy.node.Node;
@@ -35,7 +36,13 @@ public class SystemOption {
     private static final String CLASS_NAMES = "{\n" + //
             "    \"mqtt in\": \"MqttInNode\",\n" + //
             "    \"mqtt out\": \"MqttOutNode\",\n" + //
-            "    \"function\": \"FunctionNode\"\n" + //
+            "    \"function\": \"FunctionNode\",\n" + //
+            "    \"modbus server\": \"ModbusServerNode\"\n" + //
+            "    \"mqtt preprocess\": \"MqttMessageProcessingNode\"\n" + //
+            "    \"mqtt generator\": \"MqttMessageGenerator\"\n" + //
+            "    \"rule engine\": \"RuleEngineNode\"\n" + //
+            "    \"modbus keyword to register\": \"ModbusMapperKeywordToRegister\"\n" + //
+            "    \"modbus register to keyword\": \"ModbusMapperRegisterToKeyword\"\n" + //
             "}";
 
     private static JSONParser jsonParser = new JSONParser();
@@ -96,7 +103,6 @@ public class SystemOption {
             if (!(obj instanceof JSONObject)) {
                 continue;
             }
-            log.debug(obj.toString());
             JSONObject node = (JSONObject) obj;
 
             if (node.containsKey("id") && node.containsKey("type")) {
@@ -114,31 +120,28 @@ public class SystemOption {
 
     private Object getInstance(JSONObject node) {
         Object instance = null;
-
         try {
             JSONObject classNames = (JSONObject) jsonParser.parse(CLASS_NAMES);
             Class<?> nodeClass = Class.forName(CLASS_PATH + classNames.get(node.get("type").toString()));
 
             for (Constructor<?> constructor : nodeClass.getConstructors()) {
-                if (constructor.getParameterTypes()[0] == String.class
-                        && constructor.getParameterTypes()[1] == int.class
-                        && constructor.getParameterTypes()[2] == Broker.class) {
-                    if (nodeClass.equals(MqttInNode.class)) {
-                        Broker broker = new Broker(node.get("server").toString(), 1883);
-                        instance = constructor.newInstance(node.get("topic").toString(), 1, broker);
+                if (InputNode.class.isAssignableFrom(constructor.getDeclaringClass())) {
+                    if (constructor.getParameterTypes().length == 4) {
+                        instance = constructor.newInstance(node.get("topic").toString(), 1,
+                                Broker.getBroker(node.get("server").toString(), 1883),
+                                ((JSONArray) node.get("wires")).size());
                         break;
                     }
-                } else if (constructor.getParameterTypes()[0] == int.class
-                        && constructor.getParameterTypes()[1] == int.class
-                        && constructor.getParameterTypes()[2] == JSONObject.class) {
-                    instance = constructor.newInstance(1, ((JSONArray) node.get("wires")).size(), node);
+                } else if (InputOutputNode.class.isAssignableFrom(constructor.getDeclaringClass())) {
+                    instance = constructor.newInstance();
                     break;
-                } else if (constructor.getParameterTypes()[0] == String.class
-                        && constructor.getParameterTypes()[1] == Broker.class) {
-                    log.trace("@@@@");
-                    Broker broker = new Broker(node.get("server").toString(), 502);
-                    log.trace("!!!!!");
-                    instance = constructor.newInstance(broker);
+                } else if (OutputNode.class.isAssignableFrom(constructor.getDeclaringClass())) {
+                    if (constructor.getParameterTypes().length == 1) {
+                        instance = constructor.newInstance(Broker.getBroker(node.get("server").toString(), 502));
+                        break;
+                    } else if (constructor.getParameterTypes().length == 0) {
+                        instance = constructor.newInstance();
+                    }
                     break;
                 }
             }
@@ -153,18 +156,8 @@ public class SystemOption {
     }
 
     public void createFlow() {
-        /*
-         * inputNode면 connectOutputWire()
-         * outputNode면 connectInputWire()
-         * inputOutputNode면 둘다
-         * 
-         * 일단 jsonArray안에 jsonArray가 있는 상황은 기본
-         * 상황 1. JsonArray 안에 있는 JsonArray에 여러 wire들이 있는 경우
-         * 상황 2. JsonArray 안에 wire가 하나씩 있는 JsonArray들이 여러개 있는 경우
-         * 상황 3. JsonAarray 안에 여러 wire를 가진 JsonArray가 여러개 있는경우
-         */
-        log.info(nodeList.entrySet().toString());
-        log.info(wireInfo.entrySet().toString());
+        log.trace(nodeList.entrySet().toString());
+        log.trace(wireInfo.entrySet().toString());
         int inputNodeIdx = 0;
         int inputOutputNodeIdx = 0;
         Wire[] wires;
@@ -174,7 +167,6 @@ public class SystemOption {
             if (node == null) {
                 continue;
             }
-
             if (node instanceof InputNode) {
                 InputNode inputNode = (InputNode) node;
                 wires = createWires(wireInfo.get(id));
@@ -211,7 +203,6 @@ public class SystemOption {
         Wire[] wires;
         int wireListSize = 0;
         for (Object array : wireList) {
-            log.info(array.toString());
             wireListSize += ((JSONArray) array).size();
         }
         wires = new Wire[wireListSize];
@@ -225,4 +216,12 @@ public class SystemOption {
     public static String[] getSensors() {
         return sensors;
     }
+
+    public void startFlow() {
+        for (Map.Entry<String, Object> entry : nodeList.entrySet()) {
+            log.trace(entry.getValue()+"");
+            ((ActiveNode) entry.getValue()).start();
+        }
+    }
+
 }
