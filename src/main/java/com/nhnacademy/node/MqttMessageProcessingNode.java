@@ -10,7 +10,29 @@ import com.nhnacademy.system.UndefinedJsonObject;
 
 public class MqttMessageProcessingNode extends InputOutputNode {
     private String[] sensors;
-    RegisterAddressMappingTable registerAddressMappingTable;
+    private RegisterAddressMappingTable registerAddressMappingTable;
+    private String[][] infoKeys;
+    private String[][] valueKeys;
+
+    public MqttMessageProcessingNode(String id, String[] infos, String[] values) {
+        super(id, 1);
+        sensors = new String[] { "temperature", "humidity", "co2" };
+        infoKeys = new String[infos.length][];
+        for (int i = 0; i < infos.length; i++) {
+            infoKeys[i] = JsonMessage.splitKeys(infos[i]);
+        }
+        valueKeys = new String[values.length][];
+        for (int i = 0; i < values.length; i++) {
+            valueKeys[i] = JsonMessage.splitKeys(values[i]);
+        }
+        registerAddressMappingTable = RegisterAddressMappingTable
+                .getRegisterAddressMappingTable("src/main/resources/registerAddressMappingTable.json");
+    }
+
+    public static MqttMessageProcessingNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        return new MqttMessageProcessingNode(id);
+    }
 
     public MqttMessageProcessingNode(String id) {
         super(id, 1);
@@ -51,13 +73,11 @@ public class MqttMessageProcessingNode extends InputOutputNode {
                 if (destObject instanceof UndefinedJsonObject)
                     continue;
                 String dictionaryKey = branch + "." + site + "." + place + "." + devEui + "." + sensor;
-                if (!registerAddressMappingTable.hasKey(dictionaryKey))
-                    registerAddressMappingTable.writeKey(dictionaryKey);
 
                 double value = (double) destObject.get(sensor);
                 JSONObject payload = new JSONObject();
                 payload.put("registerAddress",
-                        registerAddressMappingTable.getRegisterAddressMappingTable().get(dictionaryKey));
+                        registerAddressMappingTable.get(dictionaryKey));
                 payload.put("branch", branch);
                 payload.put("site", site);
                 payload.put("place", place);
@@ -78,10 +98,6 @@ public class MqttMessageProcessingNode extends InputOutputNode {
 
     @Override
     void postprocess() {
-    }
-
-    public static void main(String[] args) {
-        MqttMessageProcessingNode mqttMessageProcessingNode = new MqttMessageProcessingNode("test");
     }
 
 }

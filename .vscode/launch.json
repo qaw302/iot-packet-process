@@ -6,6 +6,27 @@
     "configurations": [
         {
             "type": "java",
+            "name": "Flow",
+            "request": "launch",
+            "mainClass": "com.nhnacademy.system.Flow",
+            "projectName": "iot_gateway"
+        },
+        {
+            "type": "java",
+            "name": "MqttInNode",
+            "request": "launch",
+            "mainClass": "com.nhnacademy.node.MqttInNode",
+            "projectName": "iot_gateway"
+        },
+        {
+            "type": "java",
+            "name": "OutputLogger",
+            "request": "launch",
+            "mainClass": "com.nhnacademy.system.OutputLogger",
+            "projectName": "iot_gateway"
+        },
+        {
+            "type": "java",
             "name": "test",
             "request": "launch",
             "mainClass": "test",

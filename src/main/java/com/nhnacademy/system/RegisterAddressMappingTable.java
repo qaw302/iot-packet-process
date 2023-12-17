@@ -115,4 +115,11 @@ public class RegisterAddressMappingTable {
 
         getRegisterAddressMappingTable().put(key, maxAddress);
     }
+
+    public Object get(String key) {
+        if(!getRegisterAddressMappingTable().containsKey(key)) {
+            writeKey(key);
+        }
+        return getRegisterAddressMappingTable().get(key);
+    }
 }

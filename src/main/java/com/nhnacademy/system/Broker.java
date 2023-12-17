@@ -12,14 +12,14 @@ import org.eclipse.paho.client.mqttv3.persist.MqttDefaultFilePersistence;
 public class Broker {
     private String id;
     private String host;
-    private int port;
+    private long port;
     private static int count;
     private static Map<String, Broker> brokers = new HashMap<>();
 
     private IMqttClient client;
     private MqttConnectOptions options = new MqttConnectOptions();
 
-    private Broker(String id, String host, int port) {
+    private Broker(String id, String host, long port) {
         super();
         count++;
         this.id = id;
@@ -34,13 +34,13 @@ public class Broker {
         }
     }
 
-    private Broker(String host, int port) {
+    private Broker(String host, long port) {
         this("broker" + (++count), host, port);
     }
 
-    public static Broker getBroker(String id, String host, int port) {
+    public static Broker getBroker(String host, long port) {
         if (!brokers.containsKey(host + ":" + port)) {
-            Broker broker = new Broker(id, host, port);
+            Broker broker = new Broker(host + ":" + port, host, port);
             brokers.put(host + ":" + port, broker);
         }
         return brokers.get(host + ":" + port);

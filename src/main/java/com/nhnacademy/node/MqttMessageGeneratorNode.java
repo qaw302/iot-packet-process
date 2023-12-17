@@ -6,10 +6,15 @@ import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
 import com.nhnacademy.system.OutputLogger;
 
-public class MqttMessageGenerator extends InputOutputNode {
+public class MqttMessageGeneratorNode extends InputOutputNode {
 
-    public MqttMessageGenerator(String id) {
+    public MqttMessageGeneratorNode(String id) {
         super(id, 1);
+    }
+
+    public static MqttMessageGeneratorNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        return new MqttMessageGeneratorNode(id);
     }
 
     @Override

@@ -39,6 +39,11 @@ public class ModbusServerNode extends OutputNode {
         this.port = port;
     }
 
+    public static ModbusServerNode generate(JSONObject jsonObject) {
+        int port = ((Long) jsonObject.get("port")).intValue();
+        return new ModbusServerNode(port);
+    }
+
     @Override
     public void preprocess() {
         try {

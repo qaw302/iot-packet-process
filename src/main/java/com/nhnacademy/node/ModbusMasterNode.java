@@ -18,6 +18,11 @@ public class ModbusMasterNode extends InputNode {
         super(id, 1);
     }
 
+    public static ModbusMasterNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        return new ModbusMasterNode(id);
+    }
+
     @Override
     void preprocess() {
         modbusClient = new ModbusClient(1);

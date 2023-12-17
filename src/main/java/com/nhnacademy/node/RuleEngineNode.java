@@ -21,6 +21,11 @@ public class RuleEngineNode extends InputOutputNode {
         dataBase.setPrimaryKey("registerAddress");
     }
 
+    public static RuleEngineNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        return new RuleEngineNode(id);
+    }
+
     @Override
     void preprocess() {
     }

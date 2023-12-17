@@ -4,19 +4,20 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Date;
 import java.text.SimpleDateFormat;
 
 public class OutputLogger {
     private static OutputLogger instance = new OutputLogger();
     private static final String path = "src/main/resources/";
-    SimpleDateFormat simpleDateFormatStartTime = new SimpleDateFormat("YYYY-MM-DD HH:mm:ss");
+    SimpleDateFormat simpleDateFormatStartTime = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss");
     SimpleDateFormat simpleDateFormatRunningTime = new SimpleDateFormat("HH:mm:ss");
     File file;
     String transferLogs = "";
 
     private OutputLogger() {
         super();
-        file = new File(path + "transferInfo" + simpleDateFormatStartTime.format(System.currentTimeMillis()) + ".csv");
+        file = new File(path + "transferInfo " + simpleDateFormatStartTime.format(System.currentTimeMillis()) + ".csv");
         transferLogs += "id,수신,송신,에러,시작 시간,동작 시간\n";
         autoSave();
     }
@@ -62,5 +63,11 @@ public class OutputLogger {
 
     public static OutputLogger getInstance() {
         return instance;
+    }
+
+    public static void main(String[] args) {
+        long time = System.currentTimeMillis();
+        Date date = new Date(time);
+        System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date));
     }
 }

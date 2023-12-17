@@ -2,6 +2,7 @@ package com.nhnacademy.node;
 
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.simple.JSONObject;
 
 import com.nhnacademy.message.JsonMessage;
 import com.nhnacademy.message.Message;
@@ -26,6 +27,14 @@ public class MqttOutNode extends OutputNode {
 
     public void setBroker(Broker broker) {
         this.broker = broker;
+    }
+
+    public static MqttOutNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        String host = (String) jsonObject.get("host");
+        long port = (long) jsonObject.get("port");
+        Broker broker = Broker.getBroker(host, port);
+        return new MqttOutNode(id, broker);
     }
 
     @Override

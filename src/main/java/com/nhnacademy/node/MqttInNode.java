@@ -33,6 +33,16 @@ public class MqttInNode extends InputNode {
         this.broker = broker;
     }
 
+    public static MqttInNode generate(JSONObject jsonObject) {
+        String id = (String) jsonObject.get("id");
+        String topic = (String) jsonObject.get("topic");
+        int qos = ((Long) jsonObject.get("qos")).intValue();
+        String host = (String) jsonObject.get("host");
+        long port = (long) jsonObject.get("port");
+        Broker broker = Broker.getBroker(host, port);
+        return new MqttInNode(id, topic, qos, broker);
+    }
+
     public void setBroker(Broker broker) {
         this.broker = broker;
     }
